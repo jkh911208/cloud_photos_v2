@@ -1,6 +1,24 @@
+import 'package:cloud_photos_v2/screen/auth/sign_up.dart';
+import 'package:cloud_photos_v2/screen/library_permission.dart';
 import 'package:flutter/cupertino.dart';
 
 class LoadingScreen extends StatelessWidget {
+  // if media library access is granted && token found => go to Gallery
+  // if media library access is granted && token not found => go to sign up
+  // if media library access is not granted => to go library permission
+  final int test = 1;
+
+  Widget getNextScreen(i) {
+    return i == 0 ? LibraryPermissionScreen() : SignUp();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return getNextScreen(test);
+  }
+}
+
+class LoadingScreen1 extends StatelessWidget {
   Widget getPage(i) {
     if (i == 0) {
       return photosPageScaffold();
