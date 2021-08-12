@@ -1,21 +1,52 @@
 import 'package:cloud_photos_v2/screen/auth/sign_up.dart';
 import 'package:cloud_photos_v2/screen/library_permission.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 class LoadingScreen extends StatelessWidget {
-  // if media library access is granted && token found => go to Gallery
-  // if media library access is granted && token not found => go to sign up
-  // if media library access is not granted => to go library permission
-  final int test = 1;
-
-  Widget getNextScreen(i) {
-    return i == 0 ? LibraryPermissionScreen() : SignUp();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return getNextScreen(test);
+    // return getNextScreen(test);
+    return FutureBuilder<int>(
+        future: getNextScreen(),
+        builder: (context, AsyncSnapshot<int> snapshot) {
+          if (snapshot.hasData) {
+            switch (snapshot.data) {
+              case 1:
+                {
+                  return CupertinoPageScaffold(
+                      child: Center(child: Text("has data1")));
+                }
+              case 2:
+                {
+                  return SignUp();
+                }
+              case 3:
+                {
+                  return LibraryPermissionScreen();
+                }
+              default:
+                {
+                  return LibraryPermissionScreen();
+                }
+            }
+          } else {
+            return CupertinoPageScaffold(child: Text(""));
+          }
+        });
   }
+}
+
+Future<int> getNextScreen() async {
+  // if media library access is granted && token found => 1 go to Gallery
+  // if media library access is granted && token not found => 2 go to sign up
+  // if media library access is not granted => 3 to go library permission
+
+  // var result = await PhotoManager.requestPermissionExtend();
+  // print(result);
+  debugPrint("test123");
+  debugPrint("test1223");
+  return 1;
 }
 
 class LoadingScreen1 extends StatelessWidget {
