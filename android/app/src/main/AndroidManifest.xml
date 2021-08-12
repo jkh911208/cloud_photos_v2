@@ -4,6 +4,7 @@
         android:label="cloud_photos_v2"
         android:icon="@mipmap/ic_launcher">
         <activity
+            android:allowBackup="false"
             android:name=".MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"

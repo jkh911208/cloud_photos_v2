@@ -1,7 +1,8 @@
 import 'package:cloud_photos_v2/screen/auth/sign_up.dart';
 import 'package:cloud_photos_v2/screen/library_permission.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:photo_manager/photo_manager.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoadingScreen extends StatelessWidget {
   @override
@@ -42,15 +43,24 @@ Future<int> getNextScreen() async {
   // if media library access is granted && token not found => 2 go to sign up
   // if media library access is not granted => 3 to go library permission
 
-  var result = await PhotoManager.requestPermissionExtend();
-  if (result == PermissionState.authorized) {
-    print(result);
+  var permission = await Permission.storage.status;
+
+  // bool permission = false;
+  // var result = await PhotoManager.requestPermissionExtend();
+  // if (result == PermissionState.authorized) {
+  //   permission = true;
+  //   print(result);
+  // }
+
+  final storage = new FlutterSecureStorage();
+  var token = await storage.read(key: "token");
+
+  if (permission.isGranted && token != null) {
+    return 1;
+  } else if (permission.isGranted && token == null) {
+    return 2;
   }
-  // final permitted = await PhotoManager.requestPermission();
-  // print(permitted);
-  debugPrint("test123");
-  debugPrint("test1223");
-  return 2;
+  return 3;
 }
 
 class LoadingScreen1 extends StatelessWidget {
