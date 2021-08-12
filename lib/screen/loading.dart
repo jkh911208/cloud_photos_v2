@@ -42,11 +42,15 @@ Future<int> getNextScreen() async {
   // if media library access is granted && token not found => 2 go to sign up
   // if media library access is not granted => 3 to go library permission
 
-  // var result = await PhotoManager.requestPermissionExtend();
-  // print(result);
+  var result = await PhotoManager.requestPermissionExtend();
+  if (result == PermissionState.authorized) {
+    print(result);
+  }
+  // final permitted = await PhotoManager.requestPermission();
+  // print(permitted);
   debugPrint("test123");
   debugPrint("test1223");
-  return 1;
+  return 2;
 }
 
 class LoadingScreen1 extends StatelessWidget {
