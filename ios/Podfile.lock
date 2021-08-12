@@ -1,43 +1,22 @@
 PODS:
   - Flutter (1.0.0)
-  - FMDB (2.7.5):
-    - FMDB/standard (= 2.7.5)
-  - FMDB/standard (2.7.5)
   - photo_manager (1.0.0):
     - Flutter
     - FlutterMacOS
-  - sqflite (0.0.2):
-    - Flutter
-    - FMDB (>= 2.7.5)
-  - video_player (0.0.1):
-    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
-  - sqflite (from `.symlinks/plugins/sqflite/ios`)
-  - video_player (from `.symlinks/plugins/video_player/ios`)
-
-SPEC REPOS:
-  trunk:
-    - FMDB
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
   photo_manager:
     :path: ".symlinks/plugins/photo_manager/ios"
-  sqflite:
-    :path: ".symlinks/plugins/sqflite/ios"
-  video_player:
-    :path: ".symlinks/plugins/video_player/ios"
 
 SPEC CHECKSUMS:
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   photo_manager: 84fa94fbeb82e607333ea9a13c43b58e0903a463
-  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
-  video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
