@@ -26,4 +26,22 @@ class Api {
     }
     return result;
   }
+
+  Future<Map<String, dynamic>> multipart(
+      String path, Map<String, dynamic> body) async {
+    header["Content"] = "multipart/form-data";
+    var url = Uri.parse(baseUrl + path);
+    var request = http.MultipartRequest('POST', url);
+    body.forEach((key, value) {
+      request.fields[key] = value;
+    });
+    var response = await request.send();
+    Map<String, dynamic> result = {"statusCode": response.statusCode};
+    try {
+      result["json"] = jsonDecode(await response.stream.bytesToString());
+    } on Exception {
+      result["json"] = {};
+    }
+    return result;
+  }
 }
