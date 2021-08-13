@@ -45,7 +45,60 @@ class _SignUpBodyState extends State<SignUpBody> {
                   size: 100,
                 ),
               ),
-              Visibility(visible: helper1, child: Text("helper1")),
+              Visibility(
+                  visible: helper1,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(username.length >= 7
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Username at least 7 characters"),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(username.length < 30
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Username shorter than 30 characters"),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(!username.contains(" ")
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Username not have white space"),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(username.startsWith(RegExp(r'[a-zA-Z]'))
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Username start with alphabet"),
+                        ],
+                      )
+                    ],
+                  )),
               FocusScope(
                 child: Focus(
                   onFocusChange: (focus) {
@@ -75,7 +128,85 @@ class _SignUpBodyState extends State<SignUpBody> {
                   ),
                 ),
               ),
-              Visibility(visible: helper2, child: Text("helper2")),
+              Visibility(
+                  visible: helper2,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(password1.length >= 7
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Password at least 7 characters"),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(password1.length < 30
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Password shorter than 30 characters"),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(password1.contains(RegExp(r'[a-z]'))
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Password contains 1 lower case"),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(password1.contains(RegExp(r'[A-Z]'))
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Password contains 1 upper case"),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(password1.contains(RegExp(r'[0-9]'))
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
+                          ),
+                          Text("Password contains 1 number"),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(
+                                password1.contains(RegExp(r'[!@#$%^&*]'))
+                                    ? CupertinoIcons.check_mark
+                                    : CupertinoIcons.xmark),
+                          ),
+                          Text(r'Password contains one of !@#$%^&*'),
+                        ],
+                      ),
+                    ],
+                  )),
               FocusScope(
                 child: Focus(
                   onFocusChange: (focus) {
@@ -117,7 +248,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                             ? CupertinoIcons.check_mark
                             : CupertinoIcons.xmark),
                       ),
-                      Text("test"),
+                      Text("Password Match"),
                     ],
                   )),
               FocusScope(
