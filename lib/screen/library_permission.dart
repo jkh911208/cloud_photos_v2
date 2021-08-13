@@ -1,8 +1,7 @@
 import 'package:cloud_photos_v2/constant.dart';
+import 'package:cloud_photos_v2/screen/privacy_notice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:photo_manager/photo_manager.dart';
-
-import 'auth/sign_up.dart';
 
 class LibraryPermissionScreen extends StatelessWidget {
   @override
@@ -64,7 +63,7 @@ class _LibraryPermissionBodyState extends State<LibraryPermissionBody> {
                     if (result == PermissionState.authorized) {
                       Navigator.of(context).pushReplacement(
                           CupertinoPageRoute(builder: (context) {
-                        return SignUp();
+                        return PrivacyNotiveScreen();
                       }));
                     } else {
                       setState(() {
@@ -101,17 +100,4 @@ class _LibraryPermissionBodyState extends State<LibraryPermissionBody> {
           ],
         ));
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return GestureDetector(
-  //     onTap: () {
-  //       setState(() {
-  //         count++;
-  //         print(count);
-  //       });
-  //     },
-  //     child: Center(child: Text("$count")),
-  //   );
-  // }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_photos_v2/screen/auth/sign_up.dart';
 import 'package:cloud_photos_v2/screen/library_permission.dart';
 import 'package:cloud_photos_v2/screen/loading.dart';
+import 'package:cloud_photos_v2/screen/privacy_notice.dart';
 import 'package:flutter/cupertino.dart';
 
 void main() {
@@ -15,8 +16,11 @@ void main() {
         'LibraryPermission': (BuildContext context) {
           return LibraryPermissionScreen();
         },
+        'PrivacyNotice': (BuildContext context) {
+          return PrivacyNotiveScreen();
+        },
         'SignUp': (BuildContext context) {
-          return SignUp();
+          return SignUpScreen();
         },
       },
     ),
