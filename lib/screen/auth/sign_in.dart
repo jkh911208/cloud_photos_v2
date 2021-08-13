@@ -1,8 +1,13 @@
 import 'package:flutter/cupertino.dart';
 
-class SignIn extends StatelessWidget {
+class SignInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Center(
+      child: Text(
+        "sign in",
+        style: TextStyle(color: CupertinoColors.activeBlue),
+      ),
+    );
   }
 }

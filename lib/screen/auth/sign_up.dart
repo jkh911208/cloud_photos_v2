@@ -1,3 +1,4 @@
+import 'package:cloud_photos_v2/screen/auth/sign_in.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:cloud_photos_v2/constant.dart';
@@ -13,6 +14,11 @@ class SignUpScreen extends StatelessWidget {
   }
 }
 
+class SignUpConstant {
+  final int maxLength = 30;
+  final int minLength = 7;
+}
+
 class SignUpBody extends StatefulWidget {
   const SignUpBody({Key? key}) : super(key: key);
 
@@ -21,12 +27,15 @@ class SignUpBody extends StatefulWidget {
 }
 
 class _SignUpBodyState extends State<SignUpBody> {
+  final int maxLength = SignUpConstant().maxLength;
+  final int minLength = SignUpConstant().minLength;
   String username = "";
   String password1 = "";
   String password2 = "";
   bool helper1 = false;
   bool helper2 = false;
   bool helper3 = false;
+  bool error = false;
 
   @override
   Widget build(BuildContext context) {
@@ -55,11 +64,11 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(username.length >= 7
+                            child: Icon(isMinLength(username, minLength)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
-                          Text("Username at least 7 characters"),
+                          Text("Username at least $minLength characters"),
                         ],
                       ),
                       Row(
@@ -67,11 +76,11 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(username.length < 30
+                            child: Icon(isMaxLength(username, maxLength)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
-                          Text("Username shorter than 30 characters"),
+                          Text("Username shorter than $maxLength characters"),
                         ],
                       ),
                       Row(
@@ -79,7 +88,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(!username.contains(" ")
+                            child: Icon(isNotContainsWhiteSpace(username)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
@@ -91,7 +100,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(username.startsWith(RegExp(r'[a-zA-Z]'))
+                            child: Icon(isStartsWithAlpha(username)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
@@ -105,6 +114,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                   onFocusChange: (focus) {
                     setState(() {
                       helper1 = focus;
+                      error = false;
                     });
                   },
                   child: Padding(
@@ -138,11 +148,11 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(password1.length >= 7
+                            child: Icon(isMinLength(password1, minLength)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
-                          Text("Password at least 7 characters"),
+                          Text("Password at least $minLength characters"),
                         ],
                       ),
                       Row(
@@ -150,11 +160,11 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(password1.length < 30
+                            child: Icon(isMaxLength(password1, maxLength)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
-                          Text("Password shorter than 30 characters"),
+                          Text("Password shorter than $maxLength characters"),
                         ],
                       ),
                       Row(
@@ -162,7 +172,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(password1.contains(RegExp(r'[a-z]'))
+                            child: Icon(isContainsLowerCase(password1)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
@@ -174,7 +184,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(password1.contains(RegExp(r'[A-Z]'))
+                            child: Icon(isContainsUpperCase(password1)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
@@ -186,7 +196,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(password1.contains(RegExp(r'[0-9]'))
+                            child: Icon(isContainsNumber(password1)
                                 ? CupertinoIcons.check_mark
                                 : CupertinoIcons.xmark),
                           ),
@@ -198,10 +208,9 @@ class _SignUpBodyState extends State<SignUpBody> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: Icon(
-                                password1.contains(RegExp(r'[!@#$%^&*]'))
-                                    ? CupertinoIcons.check_mark
-                                    : CupertinoIcons.xmark),
+                            child: Icon(isContainsSpecialChar(password1)
+                                ? CupertinoIcons.check_mark
+                                : CupertinoIcons.xmark),
                           ),
                           Text(r'Password contains one of !@#$%^&*'),
                         ],
@@ -213,6 +222,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                   onFocusChange: (focus) {
                     setState(() {
                       helper2 = focus;
+                      error = false;
                     });
                   },
                   child: Padding(
@@ -257,6 +267,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                   onFocusChange: (focus) {
                     setState(() {
                       helper3 = focus;
+                      error = false;
                     });
                   },
                   child: Padding(
@@ -282,14 +293,132 @@ class _SignUpBodyState extends State<SignUpBody> {
                   ),
                 ),
               ),
-              CupertinoButton(child: Text("Sign Up"), onPressed: () {}),
+              CupertinoButton(
+                  child: Text("Sign Up"),
+                  onPressed: () {
+                    bool usernameCheck = isUsernameGood(username);
+                    bool passwordCheck = isPasswordGood(password1);
+                    bool confirmPassword = password1 == password2;
+                    if (usernameCheck && passwordCheck && confirmPassword) {
+                      print("make http request to create user");
+                    } else {
+                      setState(() {
+                        error = true;
+                      });
+                    }
+                  }),
               CupertinoButton(
                   child: Text("Already have account? Sign in"),
-                  onPressed: () {})
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushReplacement(CupertinoPageRoute(builder: (context) {
+                      return SignInScreen();
+                    }));
+                  }),
+              Visibility(
+                  visible: error,
+                  child: Text(
+                    "Username/Password doesn't meet requirement",
+                    style: TextStyle(color: CupertinoColors.systemRed),
+                  ))
             ],
           ),
         ),
       ),
     );
   }
+}
+
+bool isMinLength(String testValue, int testLength) {
+  if (testValue.length >= testLength) {
+    return true;
+  }
+  return false;
+}
+
+bool isMaxLength(String testValue, int testLength) {
+  if (testValue.length < testLength) {
+    return true;
+  }
+  return false;
+}
+
+bool isNotContainsWhiteSpace(String testValue) {
+  if (testValue.contains(" ")) {
+    return false;
+  }
+  return true;
+}
+
+bool isStartsWithAlpha(String testValue) {
+  if (testValue.startsWith(RegExp(r'[a-zA-z]'))) {
+    return true;
+  }
+  return false;
+}
+
+bool isContainsLowerCase(String testValue) {
+  if (testValue.contains(RegExp(r'[a-z]'))) {
+    return true;
+  }
+  return false;
+}
+
+bool isContainsUpperCase(String testValue) {
+  if (testValue.contains(RegExp(r'[A-Z]'))) {
+    return true;
+  }
+  return false;
+}
+
+bool isContainsNumber(String testValue) {
+  if (testValue.contains(RegExp(r'[0-9]'))) {
+    return true;
+  }
+  return false;
+}
+
+bool isContainsSpecialChar(String testValue) {
+  if (testValue.contains(RegExp(r'[!@#$%^&*]'))) {
+    return true;
+  }
+  return false;
+}
+
+bool isUsernameGood(String testValue) {
+  if (!isMinLength(testValue, SignUpConstant().minLength)) {
+    return false;
+  }
+  if (!isMaxLength(testValue, SignUpConstant().maxLength)) {
+    return false;
+  }
+  if (!isNotContainsWhiteSpace(testValue)) {
+    return false;
+  }
+  if (!isStartsWithAlpha(testValue)) {
+    return false;
+  }
+  return true;
+}
+
+bool isPasswordGood(String testValue) {
+  if (!isMinLength(testValue, SignUpConstant().minLength)) {
+    return false;
+  }
+  if (!isMaxLength(testValue, SignUpConstant().maxLength)) {
+    return false;
+  }
+  if (!isContainsLowerCase(testValue)) {
+    return false;
+  }
+  if (!isContainsUpperCase(testValue)) {
+    return false;
+  }
+  if (!isContainsNumber(testValue)) {
+    return false;
+  }
+  if (!isContainsSpecialChar(testValue)) {
+    return false;
+  }
+  return true;
 }

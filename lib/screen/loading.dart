@@ -44,14 +44,6 @@ Future<int> getNextScreen() async {
   // if media library access is not granted => 3 to go library permission
 
   var permission = await Permission.storage.status;
-
-  // bool permission = false;
-  // var result = await PhotoManager.requestPermissionExtend();
-  // if (result == PermissionState.authorized) {
-  //   permission = true;
-  //   print(result);
-  // }
-
   final storage = new FlutterSecureStorage();
   var token = await storage.read(key: "token");
 
@@ -126,26 +118,9 @@ class LoadingScreen1 extends StatelessWidget {
     return CupertinoTabView(builder: (context) {
       return CupertinoPageScaffold(
         child: Center(
-          child: CupertinoButton(
-              child: Text("data"),
-              onPressed: () {
-                Navigator.of(context)
-                    .push(CupertinoPageRoute(builder: (context) {
-                  return SettingsScreen();
-                }));
-              }),
+          child: CupertinoButton(child: Text("data"), onPressed: () {}),
         ),
       );
     });
-  }
-}
-
-class SettingsScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        child: Center(
-      child: Text("SettingsScreen"),
-    ));
   }
 }
