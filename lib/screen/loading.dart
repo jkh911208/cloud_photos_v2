@@ -1,4 +1,5 @@
 import 'package:cloud_photos_v2/screen/library_permission.dart';
+import 'package:cloud_photos_v2/screen/main/main_nav.dart';
 import 'package:cloud_photos_v2/screen/privacy_notice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -15,8 +16,7 @@ class LoadingScreen extends StatelessWidget {
             switch (snapshot.data) {
               case 1:
                 {
-                  return CupertinoPageScaffold(
-                      child: Center(child: Text("has data1")));
+                  return MainNav();
                 }
               case 2:
                 {

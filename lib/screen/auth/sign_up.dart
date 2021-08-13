@@ -1,5 +1,6 @@
 import 'package:cloud_photos_v2/api.dart';
 import 'package:cloud_photos_v2/screen/auth/sign_in.dart';
+import 'package:cloud_photos_v2/screen/init_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_photos_v2/constant.dart';
 import 'package:flutter/material.dart';
@@ -311,6 +312,10 @@ class _SignUpBodyState extends State<SignUpBody> {
                             key: "token",
                             value: response["json"]["access_token"]);
                         print("navigate to config screen");
+                        Navigator.of(context).pushReplacement(
+                            CupertinoPageRoute(builder: (context) {
+                          return InitConfigScreen();
+                        }));
                       } else {
                         setState(() {
                           error = "Please use different username or try later";
