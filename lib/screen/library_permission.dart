@@ -1,3 +1,4 @@
+import 'package:cloud_photos_v2/constant.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -7,7 +8,7 @@ class LibraryPermissionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: Color.fromRGBO(256, 223, 77, 1),
+      backgroundColor: Constant.CloudPhotosYellow,
       child: LibraryPermissionBody(),
     );
   }
