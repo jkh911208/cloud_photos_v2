@@ -30,10 +30,11 @@ class _SignUpBodyState extends State<SignUpBody> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        top: true,
-        bottom: true,
-        child: Center(
+    return Center(
+      child: SingleChildScrollView(
+        child: SafeArea(
+          top: true,
+          bottom: true,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -287,6 +288,8 @@ class _SignUpBodyState extends State<SignUpBody> {
                   onPressed: () {})
             ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

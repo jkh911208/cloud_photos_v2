@@ -28,10 +28,11 @@ class _PrivactNotiveBodyState extends State<PrivactNotiveBody> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        top: true,
-        bottom: true,
-        child: Center(
+    return Center(
+      child: SingleChildScrollView(
+        child: SafeArea(
+          top: true,
+          bottom: true,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -160,6 +161,8 @@ class _PrivactNotiveBodyState extends State<PrivactNotiveBody> {
                   ))
             ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
