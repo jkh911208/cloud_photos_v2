@@ -1,8 +1,9 @@
+import 'package:cloud_photos_v2/api.dart';
 import 'package:cloud_photos_v2/screen/auth/sign_in.dart';
 import 'package:flutter/cupertino.dart';
-
 import 'package:cloud_photos_v2/constant.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SignUpScreen extends StatelessWidget {
   @override
@@ -35,7 +36,7 @@ class _SignUpBodyState extends State<SignUpBody> {
   bool helper1 = false;
   bool helper2 = false;
   bool helper3 = false;
-  bool error = false;
+  String error = "";
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +115,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                   onFocusChange: (focus) {
                     setState(() {
                       helper1 = focus;
-                      error = false;
+                      error = "";
                     });
                   },
                   child: Padding(
@@ -222,7 +223,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                   onFocusChange: (focus) {
                     setState(() {
                       helper2 = focus;
-                      error = false;
+                      error = "";
                     });
                   },
                   child: Padding(
@@ -267,7 +268,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                   onFocusChange: (focus) {
                     setState(() {
                       helper3 = focus;
-                      error = false;
+                      error = "";
                     });
                   },
                   child: Padding(
@@ -295,15 +296,29 @@ class _SignUpBodyState extends State<SignUpBody> {
               ),
               CupertinoButton(
                   child: Text("Sign Up"),
-                  onPressed: () {
+                  onPressed: () async {
                     bool usernameCheck = isUsernameGood(username);
                     bool passwordCheck = isPasswordGood(password1);
                     bool confirmPassword = password1 == password2;
                     if (usernameCheck && passwordCheck && confirmPassword) {
                       print("make http request to create user");
+                      var response = await Api().post("/api/v1/user/signup",
+                          {'username': username, 'password': password1});
+                      print(response);
+                      if (response["statusCode"] == 201) {
+                        final storage = new FlutterSecureStorage();
+                        await storage.write(
+                            key: "token",
+                            value: response["json"]["access_token"]);
+                        print("navigate to config screen");
+                      } else {
+                        setState(() {
+                          error = "Please use different username or try later";
+                        });
+                      }
                     } else {
                       setState(() {
-                        error = true;
+                        error = "Username/Password doesn't meet requirements";
                       });
                     }
                   }),
@@ -316,9 +331,9 @@ class _SignUpBodyState extends State<SignUpBody> {
                     }));
                   }),
               Visibility(
-                  visible: error,
+                  visible: (error.length > 0),
                   child: Text(
-                    "Username/Password doesn't meet requirement",
+                    error,
                     style: TextStyle(color: CupertinoColors.systemRed),
                   ))
             ],

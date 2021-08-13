@@ -42,7 +42,6 @@ Future<int> getNextScreen() async {
   // if media library access is granted && token found => 1 go to Gallery
   // if media library access is granted && token not found => 2 go to sign up
   // if media library access is not granted => 3 to go library permission
-
   var permission = await Permission.storage.status;
   final storage = new FlutterSecureStorage();
   var token = await storage.read(key: "token");
