@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import 'package:cloud_photos_v2/constant.dart';
+import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatelessWidget {
   @override
@@ -36,6 +37,14 @@ class _SignUpBodyState extends State<SignUpBody> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 30),
+                child: Icon(
+                  CupertinoIcons.person_badge_plus,
+                  color: CupertinoColors.black,
+                  size: 100,
+                ),
+              ),
               Visibility(visible: helper1, child: Text("helper1")),
               FocusScope(
                 child: Focus(
@@ -44,47 +53,107 @@ class _SignUpBodyState extends State<SignUpBody> {
                       helper1 = focus;
                     });
                   },
-                  child: CupertinoTextField(
-                    onTap: () {
-                      setState(() {
-                        helper1 = true;
-                      });
-                    },
-                    autocorrect: false,
-                    placeholder: "Username",
-                    onChanged: (String value) {
-                      setState(() {
-                        username = value;
-                      });
-                    },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 8, right: 8, bottom: 25),
+                    child: CupertinoTextField(
+                      autocorrect: false,
+                      placeholder: "Username",
+                      placeholderStyle: TextStyle(color: CupertinoColors.black),
+                      style: TextStyle(color: CupertinoColors.black),
+                      decoration: BoxDecoration(
+                          color: Constant.CloudPhotosYellow,
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: CupertinoColors.black, width: 1))),
+                      onChanged: (String value) {
+                        setState(() {
+                          username = value;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ),
-              CupertinoTextField(
-                obscureText: true,
-                onSubmitted: (value) {
-                  setState(() {
-                    helper2 = false;
-                  });
-                },
-                onEditingComplete: () {
-                  setState(() {
-                    helper2 = false;
-                  });
-                },
-                onTap: () {
-                  setState(() {
-                    helper2 = true;
-                  });
-                },
-                autocorrect: false,
-                placeholder: "Password",
-                onChanged: (String value) {
-                  setState(() {
-                    password1 = value;
-                  });
-                },
-              )
+              Visibility(visible: helper2, child: Text("helper2")),
+              FocusScope(
+                child: Focus(
+                  onFocusChange: (focus) {
+                    setState(() {
+                      helper2 = focus;
+                    });
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 8, right: 8, bottom: 25),
+                    child: CupertinoTextField(
+                      autocorrect: false,
+                      placeholder: "Password",
+                      obscureText: true,
+                      placeholderStyle: TextStyle(color: CupertinoColors.black),
+                      style: TextStyle(color: CupertinoColors.black),
+                      decoration: BoxDecoration(
+                          color: Constant.CloudPhotosYellow,
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: CupertinoColors.black, width: 1))),
+                      onChanged: (String value) {
+                        setState(() {
+                          password1 = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              Visibility(
+                  visible: helper3,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(password1 == password2
+                            ? CupertinoIcons.check_mark
+                            : CupertinoIcons.xmark),
+                      ),
+                      Text("test"),
+                    ],
+                  )),
+              FocusScope(
+                child: Focus(
+                  onFocusChange: (focus) {
+                    setState(() {
+                      helper3 = focus;
+                    });
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(left: 8, right: 8, bottom: 40),
+                    child: CupertinoTextField(
+                      autocorrect: false,
+                      placeholder: "Confirm Password",
+                      obscureText: true,
+                      placeholderStyle: TextStyle(color: CupertinoColors.black),
+                      style: TextStyle(color: CupertinoColors.black),
+                      decoration: BoxDecoration(
+                          color: Constant.CloudPhotosYellow,
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: CupertinoColors.black, width: 1))),
+                      onChanged: (String value) {
+                        setState(() {
+                          password2 = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              CupertinoButton(child: Text("Sign Up"), onPressed: () {}),
+              CupertinoButton(
+                  child: Text("Already have account? Sign in"),
+                  onPressed: () {})
             ],
           ),
         ));
