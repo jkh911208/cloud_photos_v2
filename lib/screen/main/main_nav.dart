@@ -1,5 +1,5 @@
-import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/screen/main/photos_thumbnail.dart';
+import 'package:cloud_photos_v2/screen/main/settings.dart';
 import 'package:flutter/cupertino.dart';
 
 class MainNav extends StatelessWidget {
@@ -26,7 +26,11 @@ class MainNav extends StatelessWidget {
         return ThumbnailScreen();
       });
     } else if (i == 1) {
-      return Center(child: SafeArea(child: Text("2")));
+      return CupertinoTabView(
+        builder: (context) {
+          return SettingsScreen();
+        },
+      );
     }
     return Text("1");
   }

@@ -1,9 +1,6 @@
 import 'package:cloud_photos_v2/constant.dart';
-import 'package:cloud_photos_v2/util.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'dart:io';
-import 'package:path/path.dart';
+import 'package:cloud_photos_v2/database.dart';
 
 class ThumbnailScreen extends StatelessWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -23,37 +20,41 @@ class ThumbnailBody extends StatefulWidget {
 }
 
 class _ThumbnailBodyState extends State<ThumbnailBody> {
-  var photos = [];
+  List photos = [];
 
   _ThumbnailBodyState() {
-    getPhotos();
+    getAllMedia();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SafeArea(
-        child: (photos.length > 0) ? Image.file(File(photos[0])) : Text("1"),
-      ),
+    return CustomScrollView(
+      slivers: <Widget>[
+        CupertinoSliverNavigationBar(
+          largeTitle: Text("Photos"),
+        ),
+        SliverFillRemaining(
+          child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4),
+              itemCount: photos.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                    padding: const EdgeInsets.all(1),
+                    child: Image.memory(photos[index].thumbnail,
+                        width: MediaQuery.of(context).size.width / 4 - 2,
+                        height: MediaQuery.of(context).size.width / 4 - 2,
+                        fit: BoxFit.cover));
+              }),
+        )
+      ],
     );
   }
 
-  Future getPhotos() async {
-    List<AssetPathEntity> list = await PhotoManager.getAssetPathList();
-    print(list);
-    final assetList = await list[0].getAssetListRange(start: 0, end: 88);
-    print(assetList);
-    AssetEntity entity = assetList[0];
-    var file = await entity.file;
-    if (file == null) {
-      return null;
-    }
-    print(await file.length());
-    print(basename(file.path));
-    String md5 = await getMD5FromFile(file);
-    print(md5);
+  Future getAllMedia() async {
+    List<Media> newList = await MediaTable().selectAll();
     setState(() {
-      photos = [file.path.toString()];
+      photos = newList;
     });
   }
 }
