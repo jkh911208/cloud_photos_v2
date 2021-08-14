@@ -8,7 +8,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // return getNextScreen(test);
     return FutureBuilder<int>(
         future: getNextScreen(),
         builder: (context, AsyncSnapshot<int> snapshot) {
@@ -32,7 +31,8 @@ class LoadingScreen extends StatelessWidget {
                 }
             }
           } else {
-            return CupertinoPageScaffold(child: Text(""));
+            // TODO splash screen
+            return Text("");
           }
         });
   }
