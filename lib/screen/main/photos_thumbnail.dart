@@ -48,13 +48,6 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
   }
 
   Future<void> getAllMedia() async {
-    //   List<Media> newList = await MediaTable().selectAll();
-    //   print(newList[0].uri);
-    //   setState(() {
-    //     photos = newList;
-    //   });
-    // }
-
     List<AssetPathEntity> albums =
         await PhotoManager.getAssetPathList(onlyAll: true);
     AssetPathEntity album = albums.first;
