@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/screen/main/photos_single_view.dart';
 import 'package:flutter/cupertino.dart';
@@ -25,7 +23,6 @@ class ThumbnailBody extends StatefulWidget {
 
 class _ThumbnailBodyState extends State<ThumbnailBody> {
   List<AssetEntity> photos = [];
-  List<Widget> singleViewPhotos = [];
 
   _ThumbnailBodyState() {
     getAllMedia();
@@ -45,13 +42,13 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
                 child: AssetThumbnail(
                   asset: photos,
                   index: index,
-                  singleViewPhotos: singleViewPhotos,
                 ));
           }),
     );
   }
 
   Future<void> getAllMedia() async {
+    print("get all media");
     List<AssetPathEntity> albums =
         await PhotoManager.getAssetPathList(onlyAll: true);
     AssetPathEntity album = albums.first;
@@ -62,40 +59,14 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
     setState(() {
       photos = assetList;
     });
-
-    // List<Widget> tempList = [];
-    // int length = assetList.length;
-    // for (var i = 0; i < assetList.length; i++) {
-    //   var first = DateTime.now().millisecondsSinceEpoch;
-    //   File? file = await assetList[i].file;
-    //   print("file load");
-    //   print(DateTime.now().millisecondsSinceEpoch - first);
-    //   if (file == null) {
-    //     continue;
-    //   }
-    //   print("$i out of $length");
-    //   var second = DateTime.now().millisecondsSinceEpoch;
-    //   tempList.add(Image.file(file));
-    //   print("add to list");
-    //   print(DateTime.now().millisecondsSinceEpoch - second);
-    // }
-    // setState(() {
-    //   singleViewPhotos = tempList;
-    // });
-
-    // print("finish set single view photos");
   }
 }
 
 class AssetThumbnail extends StatelessWidget {
   final List<AssetEntity> asset;
   final int index;
-  final List<Widget> singleViewPhotos;
 
-  AssetThumbnail(
-      {required this.asset,
-      required this.index,
-      required this.singleViewPhotos});
+  AssetThumbnail({required this.asset, required this.index});
 
   @override
   Widget build(BuildContext context) {
@@ -110,10 +81,7 @@ class AssetThumbnail extends StatelessWidget {
                       .push(CupertinoPageRoute(
                           fullscreenDialog: true,
                           builder: (context) {
-                            return SingleViewScreen(
-                                asset: asset,
-                                photos: singleViewPhotos,
-                                index: index);
+                            return SingleViewScreen(asset: asset, index: index);
                           }));
                 },
                 child: Stack(children: [
