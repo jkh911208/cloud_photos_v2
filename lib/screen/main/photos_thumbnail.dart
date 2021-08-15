@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:cloud_photos_v2/constant.dart';
+import 'package:cloud_photos_v2/screen/main/photos_single_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -22,6 +25,7 @@ class ThumbnailBody extends StatefulWidget {
 
 class _ThumbnailBodyState extends State<ThumbnailBody> {
   List<AssetEntity> photos = [];
+  List<Widget> singleViewPhotos = [];
 
   _ThumbnailBodyState() {
     getAllMedia();
@@ -31,13 +35,18 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
   Widget build(BuildContext context) {
     return GestureDetector(
       child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4),
+          // gridDelegate: SliverGridDelegate(cross),
+          gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
           itemCount: photos.length,
           itemBuilder: (BuildContext context, int index) {
             return Padding(
                 padding: const EdgeInsets.all(1),
-                child: AssetThumbnail(asset: photos, index: index));
+                child: AssetThumbnail(
+                  asset: photos,
+                  index: index,
+                  singleViewPhotos: singleViewPhotos,
+                ));
           }),
     );
   }
@@ -53,32 +62,59 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
     setState(() {
       photos = assetList;
     });
+
+    // List<Widget> tempList = [];
+    // int length = assetList.length;
+    // for (var i = 0; i < assetList.length; i++) {
+    //   var first = DateTime.now().millisecondsSinceEpoch;
+    //   File? file = await assetList[i].file;
+    //   print("file load");
+    //   print(DateTime.now().millisecondsSinceEpoch - first);
+    //   if (file == null) {
+    //     continue;
+    //   }
+    //   print("$i out of $length");
+    //   var second = DateTime.now().millisecondsSinceEpoch;
+    //   tempList.add(Image.file(file));
+    //   print("add to list");
+    //   print(DateTime.now().millisecondsSinceEpoch - second);
+    // }
+    // setState(() {
+    //   singleViewPhotos = tempList;
+    // });
+
+    // print("finish set single view photos");
   }
 }
 
 class AssetThumbnail extends StatelessWidget {
   final List<AssetEntity> asset;
   final int index;
+  final List<Widget> singleViewPhotos;
 
-  AssetThumbnail({required this.asset, required this.index});
+  AssetThumbnail(
+      {required this.asset,
+      required this.index,
+      required this.singleViewPhotos});
 
   @override
   Widget build(BuildContext context) {
-    // We're using a FutureBuilder since thumbData is a future
     return FutureBuilder(
         future: asset[index].thumbData,
         builder: (context, AsyncSnapshot snapshot) {
           final bytes = snapshot.data;
-          // If we have no data, display a spinner
           if (snapshot.hasData)
-            // If there's data, display it as an image
             return GestureDetector(
-                onTap: () async {
-                  if (asset[index].duration > 0) {
-                    print("this is video");
-                  } else {
-                    print("this is photo");
-                  }
+                onTap: () {
+                  Navigator.of(context, rootNavigator: true)
+                      .push(CupertinoPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) {
+                            return SingleViewScreen(
+                                asset: asset,
+                                photos: singleViewPhotos,
+                                index: index);
+                          }));
                 },
                 child: Stack(children: [
                   Positioned.fill(
