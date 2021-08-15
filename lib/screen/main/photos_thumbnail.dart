@@ -29,22 +29,17 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-        itemCount: photos.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Padding(
-              padding: const EdgeInsets.all(1),
-              child: FutureBuilder(
-                  future: photos[index].thumbData,
-                  builder: (context, AsyncSnapshot snapshot) {
-                    if (snapshot.hasData) {
-                      return Image.memory(snapshot.data, fit: BoxFit.cover);
-                    }
-                    return CircularProgressIndicator();
-                  }));
-        });
+    return GestureDetector(
+      child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4),
+          itemCount: photos.length,
+          itemBuilder: (BuildContext context, int index) {
+            return Padding(
+                padding: const EdgeInsets.all(1),
+                child: AssetThumbnail(asset: photos, index: index));
+          }),
+    );
   }
 
   Future<void> getAllMedia() async {
@@ -58,5 +53,50 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
     setState(() {
       photos = assetList;
     });
+  }
+}
+
+class AssetThumbnail extends StatelessWidget {
+  final List<AssetEntity> asset;
+  final int index;
+
+  AssetThumbnail({required this.asset, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    // We're using a FutureBuilder since thumbData is a future
+    return FutureBuilder(
+        future: asset[index].thumbData,
+        builder: (context, AsyncSnapshot snapshot) {
+          final bytes = snapshot.data;
+          // If we have no data, display a spinner
+          if (snapshot.hasData)
+            // If there's data, display it as an image
+            return GestureDetector(
+                onTap: () async {
+                  if (asset[index].duration > 0) {
+                    print("this is video");
+                  } else {
+                    print("this is photo");
+                  }
+                },
+                child: Stack(children: [
+                  Positioned.fill(
+                      child: Image.memory(bytes, fit: BoxFit.cover)),
+                  isVideo(asset[index])
+                ]));
+          return CircularProgressIndicator();
+        });
+  }
+
+  Widget isVideo(AssetEntity asset) {
+    if (asset.duration > 0) {
+      return Center(
+          child: Icon(
+        CupertinoIcons.play,
+        color: CupertinoColors.systemRed,
+      ));
+    }
+    return Container();
   }
 }
