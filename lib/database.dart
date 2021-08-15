@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:sqflite/sqflite.dart';
@@ -83,6 +84,7 @@ class MediaTable {
       db = await getDatabaseObject();
     }
 
+    var first = DateTime.now().millisecondsSinceEpoch;
     Map<String, dynamic> data = media.toMap();
     if (data["thumbnail"] != null) {
       String temp = "";
@@ -92,12 +94,17 @@ class MediaTable {
       temp = temp.substring(0, temp.length - 1);
       data["thumbnail"] = temp;
     }
+    print("convert list int to string");
+    print(DateTime.now().millisecondsSinceEpoch - first);
 
-    await db.insert(
+    var second = DateTime.now().millisecondsSinceEpoch;
+    db.insert(
       table,
       data,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    print("actual insert operation");
+    print(DateTime.now().millisecondsSinceEpoch - second);
   }
 
   Future<List<Media>> selectAll() async {
@@ -117,6 +124,9 @@ class MediaTable {
           newList[j] = int.parse(tempString[j]);
         }
         temp["thumbnail"] = newList;
+      }
+      if (!File(temp["uri"]).existsSync()) {
+        continue;
       }
       finalResult.add(mediaFromMap(temp));
     }

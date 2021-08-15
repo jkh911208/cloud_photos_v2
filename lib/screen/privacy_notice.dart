@@ -27,10 +27,6 @@ class _PrivactNotiveBodyState extends State<PrivactNotiveBody> {
   bool second = false;
   bool error = false;
 
-  _PrivactNotiveBodyState() {
-    updateEntireLibrary();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
