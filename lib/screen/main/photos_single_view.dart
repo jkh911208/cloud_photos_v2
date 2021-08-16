@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:cloud_photos_v2/screen/main/single_photo.dart';
 import 'package:cloud_photos_v2/screen/main/single_video.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class SingleViewScreen extends StatelessWidget {

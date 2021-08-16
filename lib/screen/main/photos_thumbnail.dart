@@ -86,7 +86,11 @@ class AssetThumbnail extends StatelessWidget {
                 },
                 child: Stack(children: [
                   Positioned.fill(
-                      child: Image.memory(bytes, fit: BoxFit.cover)),
+                      child: Image.memory(
+                    bytes,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                  )),
                   isVideo(asset[index])
                 ]));
           return CircularProgressIndicator();
