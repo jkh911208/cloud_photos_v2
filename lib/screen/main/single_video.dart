@@ -6,44 +6,37 @@ import 'package:video_player/video_player.dart';
 
 class SingleVideo extends StatefulWidget {
   final File file;
-  // late final VideoPlayerController videoController;
+  late final VideoPlayerController videoController;
 
-  SingleVideo({Key? key, required this.file}) : super(key: key);
-  // {
-  //   videoController = VideoPlayerController.file(file);
-  // }
+  SingleVideo({Key? key, required this.file}) : super(key: key) {
+    videoController = VideoPlayerController.file(file);
+  }
 
   @override
-  _VideoPlayerState createState() => _VideoPlayerState();
+  _VideoPlayerState createState() =>
+      _VideoPlayerState(videoController: videoController);
 }
 
 class _VideoPlayerState extends State<SingleVideo> {
   bool initialized = false;
   bool floatingButtonVisible = true;
-  late VideoPlayerController _videoController;
+  VideoPlayerController videoController;
 
-  _VideoPlayerState() {
-    _videoController = VideoPlayerController.file(widget.file);
-    _videoController
+  _VideoPlayerState({required this.videoController}) {
+    videoController
       ..initialize().then((_) {
         setState(() {
           initialized = true;
         });
       });
-    // widget.videoController
-    //   ..initialize().then((_) {
-    //     setState(() {
-    //       initialized = true;
-    //     });
-    //   });
   }
 
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  //   widget.videoController.pause();
-  //   widget.videoController.dispose();
-  // }
+  @override
+  void dispose() {
+    super.dispose();
+    videoController.pause();
+    videoController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,15 +46,15 @@ class _VideoPlayerState extends State<SingleVideo> {
               onTap: () {
                 setState(() {
                   if (floatingButtonVisible == false) {
-                    _videoController.pause();
+                    videoController.pause();
                   }
                   floatingButtonVisible = !floatingButtonVisible;
                 });
               },
               child: Center(
                 child: AspectRatio(
-                  aspectRatio: _videoController.value.aspectRatio,
-                  child: VideoPlayer(_videoController),
+                  aspectRatio: videoController.value.aspectRatio,
+                  child: VideoPlayer(videoController),
                 ),
               ),
             ),
@@ -70,17 +63,17 @@ class _VideoPlayerState extends State<SingleVideo> {
               child: Align(
                 alignment: Alignment(0, 0),
                 child: FloatingActionButton(
-                  child: Icon(_videoController.value.isPlaying
+                  child: Icon(videoController.value.isPlaying
                       ? CupertinoIcons.pause
                       : CupertinoIcons.play),
                   backgroundColor: CupertinoColors.systemRed,
                   onPressed: () {
                     setState(() {
-                      if (_videoController.value.isPlaying) {
-                        _videoController.pause();
+                      if (videoController.value.isPlaying) {
+                        videoController.pause();
                       } else {
                         floatingButtonVisible = false;
-                        _videoController.play();
+                        videoController.play();
                       }
                     });
                   },
