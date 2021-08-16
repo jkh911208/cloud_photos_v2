@@ -6,10 +6,20 @@ import 'package:video_player/video_player.dart';
 
 class SingleVideo extends StatefulWidget {
   final File file;
+  final PageController pageController;
   late final VideoPlayerController videoController;
+  late final double? currentPage;
 
-  SingleVideo({Key? key, required this.file}) : super(key: key) {
+  SingleVideo({Key? key, required this.file, required this.pageController})
+      : super(key: key) {
     videoController = VideoPlayerController.file(file);
+    currentPage = pageController.page;
+    pageController.addListener(() {
+      double? newPage = pageController.page;
+      if (currentPage != newPage) {
+        videoController.pause();
+      }
+    });
   }
 
   @override

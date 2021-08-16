@@ -61,7 +61,8 @@ class _SingleViewBodyState extends State<SingleViewBody> {
             if (widget.asset[position].type == AssetType.image) {
               return SinglePhoto(file: snapshot.data);
             } else if (widget.asset[position].type == AssetType.video) {
-              return SingleVideo(file: snapshot.data);
+              return SingleVideo(
+                  file: snapshot.data, pageController: widget.pageController);
             }
           }
           return Center(
@@ -120,6 +121,6 @@ class _SingleViewBodyState extends State<SingleViewBody> {
           height: 60,
           width: double.infinity),
       alignment: Alignment(0, 1),
-    ); 
+    );
   }
 }
