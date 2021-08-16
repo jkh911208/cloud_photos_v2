@@ -24,37 +24,32 @@ class SingleViewScreen extends StatelessWidget {
 class SingleViewBody extends StatefulWidget {
   final int index;
   final List<AssetEntity> asset;
-  const SingleViewBody({Key? key, required this.index, required this.asset})
-      : super(key: key);
+  late final PageController pageController;
+
+  SingleViewBody({Key? key, required this.index, required this.asset})
+      : super(key: key) {
+    pageController = PageController(initialPage: index);
+  }
 
   @override
-  _SingleViewBodyState createState() => _SingleViewBodyState(
-      asset: asset,
-      index: index,
-      controller: PageController(initialPage: index));
+  _SingleViewBodyState createState() => _SingleViewBodyState();
 }
 
 class _SingleViewBodyState extends State<SingleViewBody> {
-  final List<AssetEntity> asset;
-  PageController controller;
-  int index;
-
-  _SingleViewBodyState(
-      {required this.index, required this.controller, required this.asset});
-
   @override
   Widget build(BuildContext context) {
+    int index = widget.index;
     return Stack(children: [
       SafeArea(
         child: PageView.builder(
-            controller: controller,
+            controller: widget.pageController,
             allowImplicitScrolling: true, // allows caching next page
             onPageChanged: (int newIndex) {
               index = newIndex;
             },
-            itemCount: asset.length,
+            itemCount: widget.asset.length,
             itemBuilder: (context, position) {
-              return BuildItem(asset: asset, index: position);
+              return BuildItem(asset: widget.asset, position: position);
             }),
       ),
       Align(
@@ -111,30 +106,27 @@ class _SingleViewBodyState extends State<SingleViewBody> {
 
 class BuildItem extends StatefulWidget {
   final List<AssetEntity> asset;
-  final int index;
-  const BuildItem({Key? key, required this.asset, required this.index})
+  final int position;
+  const BuildItem({Key? key, required this.asset, required this.position})
       : super(key: key);
 
   @override
-  _BuildItemState createState() => _BuildItemState(asset: asset, index: index);
+  _BuildItemState createState() => _BuildItemState();
 }
 
 class _BuildItemState extends State<BuildItem> {
-  final List<AssetEntity> asset;
-  int index;
   int dragDown = 0;
   bool dragCancel = false;
-
-  _BuildItemState({required this.asset, required this.index});
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: asset[index].file,
+        future: widget.asset[widget.position].file,
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
-            print("load $index finished");
-            if (asset[index].type == AssetType.image) {
+            int currentPosition = widget.position;
+            print("load $currentPosition finished");
+            if (widget.asset[widget.position].type == AssetType.image) {
               return GestureDetector(
                   onVerticalDragStart: (details) {
                     dragDown = 0;
@@ -156,7 +148,7 @@ class _BuildItemState extends State<BuildItem> {
                   child: Image.file(
                     snapshot.data,
                   ));
-            } else if (asset[index].type == AssetType.video) {
+            } else if (widget.asset[widget.position].type == AssetType.video) {
               VideoPlayerController controller =
                   VideoPlayerController.file(snapshot.data);
               return VideoPlayerScreen(
@@ -173,26 +165,23 @@ class _BuildItemState extends State<BuildItem> {
 }
 
 class VideoPlayerScreen extends StatefulWidget {
+  final File videoFile;
+  final VideoPlayerController controller;
+
   const VideoPlayerScreen(
       {Key? key, required this.videoFile, required this.controller})
       : super(key: key);
 
-  final File videoFile;
-  final VideoPlayerController controller;
-
   @override
-  _VideoPlayerState createState() =>
-      _VideoPlayerState(videoFile: videoFile, controller: controller);
+  _VideoPlayerState createState() => _VideoPlayerState();
 }
 
 class _VideoPlayerState extends State<VideoPlayerScreen> {
-  final File videoFile;
-  VideoPlayerController controller;
   bool initialized = false;
   bool floatingButtonVisible = true;
 
-  _VideoPlayerState({required this.videoFile, required this.controller}) {
-    controller
+  _VideoPlayerState() {
+    widget.controller
       ..initialize().then((_) {
         setState(() {
           initialized = true;
@@ -203,8 +192,8 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
   @override
   void dispose() {
     super.dispose();
-    controller.pause();
-    controller.dispose();
+    widget.controller.pause();
+    widget.controller.dispose();
   }
 
   @override
@@ -215,15 +204,15 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
               onTap: () {
                 setState(() {
                   if (floatingButtonVisible == false) {
-                    controller.pause();
+                    widget.controller.pause();
                   }
                   floatingButtonVisible = !floatingButtonVisible;
                 });
               },
               child: Center(
                 child: AspectRatio(
-                  aspectRatio: controller.value.aspectRatio,
-                  child: VideoPlayer(controller),
+                  aspectRatio: widget.controller.value.aspectRatio,
+                  child: VideoPlayer(widget.controller),
                 ),
               ),
             ),
@@ -232,17 +221,17 @@ class _VideoPlayerState extends State<VideoPlayerScreen> {
               child: Align(
                 alignment: Alignment(0, 0),
                 child: FloatingActionButton(
-                  child: Icon(controller.value.isPlaying
+                  child: Icon(widget.controller.value.isPlaying
                       ? CupertinoIcons.pause
                       : CupertinoIcons.play),
                   backgroundColor: CupertinoColors.systemRed,
                   onPressed: () {
                     setState(() {
-                      if (controller.value.isPlaying) {
-                        controller.pause();
+                      if (widget.controller.value.isPlaying) {
+                        widget.controller.pause();
                       } else {
                         floatingButtonVisible = false;
-                        controller.play();
+                        widget.controller.play();
                       }
                     });
                   },
