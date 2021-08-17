@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:cloud_photos_v2/screen/main/single_photo.dart';
 import 'package:cloud_photos_v2/screen/main/single_video.dart';
 import 'package:flutter/cupertino.dart';
@@ -5,75 +6,79 @@ import 'package:photo_manager/photo_manager.dart';
 
 class SingleViewScreen extends StatelessWidget {
   final int index;
-  final List<AssetEntity> asset;
-  const SingleViewScreen({Key? key, required this.index, required this.asset})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-        backgroundColor: CupertinoColors.black,
-        child: SingleViewBody(
-          index: index,
-          asset: asset,
-        ));
-  }
-}
-
-class SingleViewBody extends StatefulWidget {
-  final int index;
-  final List<AssetEntity> asset;
+  final List<Map<String, dynamic>> photos;
   late final PageController pageController;
 
-  SingleViewBody({Key? key, required this.index, required this.asset})
+  SingleViewScreen({Key? key, required this.index, required this.photos})
       : super(key: key) {
     pageController = PageController(initialPage: index);
   }
 
   @override
-  _SingleViewBodyState createState() => _SingleViewBodyState();
-}
-
-class _SingleViewBodyState extends State<SingleViewBody> {
-  @override
   Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+        backgroundColor: CupertinoColors.black,
+        child: FutureBuilder(
+          future: buildPageView(context),
+          builder: (context, AsyncSnapshot snapshot) {
+            if (snapshot.hasData) {
+              return snapshot.data;
+            }
+            return Center(
+              child: CupertinoActivityIndicator(),
+            );
+          },
+        ));
+  }
+
+  Future<Widget> buildPageView(BuildContext context) async {
     return Stack(children: [
       SafeArea(
         child: PageView.builder(
-            controller: widget.pageController,
+            controller: pageController,
             allowImplicitScrolling: true, // allows caching next page
-            itemCount: widget.asset.length,
+            itemCount: photos.length,
             itemBuilder: (_, position) {
-              return customItemBuilder(position);
+              return FutureBuilder(
+                  future: buildSingleView(position),
+                  builder: (_, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData) {
+                      return snapshot.data;
+                    }
+                    return Center(
+                      child: CupertinoActivityIndicator(),
+                    );
+                  });
             }),
       ),
-      customFooter()
+      customFooter(context)
     ]);
   }
 
-  Widget customItemBuilder(int position) {
-    return FutureBuilder(
-        future: widget.asset[position].file,
-        builder: (_, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            int currentPosition = position;
-            print("load $currentPosition finished");
-            if (widget.asset[position].type == AssetType.image) {
-              return SinglePhoto(file: snapshot.data);
-            } else if (widget.asset[position].type == AssetType.video) {
-              return SingleVideo(
-                  file: snapshot.data, pageController: widget.pageController);
-            }
+  Future<Widget> buildSingleView(int position) async {
+    if (photos[position]["localId"] != null) {
+      AssetEntity? asset =
+          await AssetEntity.fromId(photos[position]["localId"]);
+      if (asset != null) {
+        File? file = await asset.file;
+        if (file != null) {
+          if (photos[position]["duration"] == 0) {
+            return SinglePhoto(file: file);
+          } else {
+            return SingleVideo(file: file, pageController: pageController);
           }
-          return Center(
-            child: CupertinoActivityIndicator(
-              animating: true,
-            ),
-          );
-        });
+        }
+      }
+    }
+    return Center(
+      child: Text(
+        "$position",
+        style: TextStyle(color: CupertinoColors.activeBlue),
+      ),
+    );
   }
 
-  Widget customFooter() {
+  Widget customFooter(BuildContext context) {
     return Align(
       child: Container(
           child: Row(
@@ -97,7 +102,7 @@ class _SingleViewBodyState extends State<SingleViewBody> {
               ),
               CupertinoButton(
                 onPressed: () {
-                  print(widget.pageController.page);
+                  print(pageController.page);
                 },
                 child: Icon(
                   CupertinoIcons.trash,

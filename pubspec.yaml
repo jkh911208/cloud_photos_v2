@@ -36,6 +36,7 @@ dependencies:
   flutter_dotenv: ^5.0.2
   crypto: ^3.0.1
   video_player: ^2.1.13
+  sqflite: ^2.0.0+3
 
 dev_dependencies:
   flutter_test:
