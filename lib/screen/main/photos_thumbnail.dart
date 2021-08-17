@@ -5,6 +5,7 @@ import 'package:cloud_photos_v2/screen/main/photos_single_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 
 class ThumbnailScreen extends StatelessWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -32,16 +33,22 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: GridView.builder(
-          addAutomaticKeepAlives: true,
-          addRepaintBoundaries: true,
-          gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-          itemCount: photos.length,
-          itemBuilder: (BuildContext context, int index) {
-            return thumbnailBuilder(index);
-          }),
+    ScrollController scrollController = ScrollController();
+    return SafeArea(
+      child: DraggableScrollbar.rrect(
+        scrollbarTimeToFade: Duration(seconds: 5),
+        controller: scrollController,
+        child: GridView.builder(
+            addAutomaticKeepAlives: true,
+            addRepaintBoundaries: true,
+            controller: scrollController,
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+            itemCount: photos.length,
+            itemBuilder: (BuildContext context, int index) {
+              return thumbnailBuilder(index);
+            }),
+      ),
     );
   }
 
