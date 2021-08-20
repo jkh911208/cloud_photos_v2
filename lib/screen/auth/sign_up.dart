@@ -6,29 +6,12 @@ import 'package:cloud_photos_v2/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: Constant.CloudPhotosYellow,
-      child: SignUpBody(),
-    );
-  }
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class SignUpConstant {
-  final int maxLength = 30;
-  final int minLength = 7;
-}
-
-class SignUpBody extends StatefulWidget {
-  const SignUpBody({Key? key}) : super(key: key);
-
-  @override
-  _SignUpBodyState createState() => _SignUpBodyState();
-}
-
-class _SignUpBodyState extends State<SignUpBody> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final int maxLength = SignUpConstant().maxLength;
   final int minLength = SignUpConstant().minLength;
   String username = "";
@@ -41,6 +24,13 @@ class _SignUpBodyState extends State<SignUpBody> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Constant.CloudPhotosYellow,
+      body: buildSignUpBody(),
+    );
+  }
+
+  Widget buildSignUpBody() {
     return Center(
       child: SingleChildScrollView(
         child: SafeArea(
@@ -312,7 +302,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                             value: response["json"]["access_token"]);
                         print("navigate to config screen");
                         Navigator.of(context).pushReplacement(
-                            CupertinoPageRoute(builder: (context) {
+                            MaterialPageRoute(builder: (context) {
                           return InitConfigScreen();
                         }));
                       } else {
@@ -330,7 +320,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                   child: Text("Already have account? Sign in"),
                   onPressed: () {
                     Navigator.of(context)
-                        .pushReplacement(CupertinoPageRoute(builder: (context) {
+                        .pushReplacement(MaterialPageRoute(builder: (context) {
                       return SignInScreen();
                     }));
                   }),
@@ -346,6 +336,11 @@ class _SignUpBodyState extends State<SignUpBody> {
       ),
     );
   }
+}
+
+class SignUpConstant {
+  final int maxLength = 30;
+  final int minLength = 7;
 }
 
 bool isMinLength(String testValue, int testLength) {

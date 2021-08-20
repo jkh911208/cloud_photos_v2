@@ -1,5 +1,5 @@
 import 'package:cloud_photos_v2/screen/library_permission.dart';
-import 'package:cloud_photos_v2/screen/main/main_nav.dart';
+import 'package:cloud_photos_v2/screen/main/photos_thumbnail.dart';
 import 'package:cloud_photos_v2/screen/privacy_notice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -15,7 +15,7 @@ class LoadingScreen extends StatelessWidget {
             switch (snapshot.data) {
               case 1:
                 {
-                  return MainNav();
+                  return ThumbnailScreen();
                 }
               case 2:
                 {
@@ -31,8 +31,9 @@ class LoadingScreen extends StatelessWidget {
                 }
             }
           } else {
-            // TODO splash screen
-            return Text("");
+            return Center(
+              child: CupertinoActivityIndicator(),
+            );
           }
         });
   }
@@ -52,74 +53,4 @@ Future<int> getNextScreen() async {
     return 2;
   }
   return 3;
-}
-
-class LoadingScreen1 extends StatelessWidget {
-  Widget getPage(i) {
-    if (i == 0) {
-      return photosPageScaffold();
-    } else if (i == 2) {
-      return settingsPageScaffold();
-    }
-    return photosPageScaffold();
-  }
-
-  Widget cupertinoTabScaffold() => CupertinoTabScaffold(
-        tabBuilder: (context, i) => CupertinoPageScaffold(
-          child: Center(
-            child: getPage(i),
-          ),
-        ),
-        tabBar: CupertinoTabBar(
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.photo), label: "Photos"),
-            BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.collections), label: "Collection"),
-            BottomNavigationBarItem(
-                icon: Icon(CupertinoIcons.settings), label: "Settings")
-          ],
-        ),
-      );
-
-  Widget photosPageScaffold() => CupertinoPageScaffold(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            CupertinoSliverNavigationBar(
-              largeTitle: Text("Photos"),
-            ),
-            SliverFillRemaining(
-              child: Center(
-                child: Text("Thumbnail goes here"),
-              ),
-            )
-          ],
-        ),
-      );
-
-  Widget settingsPageScaffold() => CupertinoPageScaffold(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            CupertinoSliverNavigationBar(
-              largeTitle: Text("Settings"),
-            ),
-            SliverFillRemaining(
-              child: Center(
-                child: Text("Settings goes here"),
-              ),
-            )
-          ],
-        ),
-      );
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoTabView(builder: (context) {
-      return CupertinoPageScaffold(
-        child: Center(
-          child: CupertinoButton(child: Text("data"), onPressed: () {}),
-        ),
-      );
-    });
-  }
 }

@@ -1,37 +1,32 @@
 import 'package:cloud_photos_v2/constant.dart';
-import 'package:cloud_photos_v2/screen/main/main_nav.dart';
+import 'package:cloud_photos_v2/screen/main/photos_thumbnail.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class InitConfigScreen extends StatelessWidget {
+class InitConfigScreen extends StatefulWidget {
   const InitConfigScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: Constant.CloudPhotosYellow,
-      child: InitConfigBody(),
-    );
-  }
+  _InitConfigScreenState createState() => _InitConfigScreenState();
 }
 
-class InitConfigBody extends StatefulWidget {
-  const InitConfigBody({Key? key}) : super(key: key);
-
-  @override
-  _InitConfigBodyState createState() => _InitConfigBodyState();
-}
-
-class _InitConfigBodyState extends State<InitConfigBody> {
+class _InitConfigScreenState extends State<InitConfigScreen> {
   bool wifiOnly = true;
   final storage = new FlutterSecureStorage();
 
-  _InitConfigBodyState() {
+  _InitConfigScreenState() {
     setConfig();
   }
-
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Constant.CloudPhotosYellow,
+      body: buildInitConfigBody(),
+    );
+  }
+
+  Widget buildInitConfigBody() {
     return Center(
       child: SafeArea(
           child: Column(
@@ -79,8 +74,8 @@ class _InitConfigBodyState extends State<InitConfigBody> {
               onPressed: () async {
                 setConfig();
                 Navigator.of(context)
-                    .pushReplacement(CupertinoPageRoute(builder: (context) {
-                  return MainNav();
+                    .pushReplacement(MaterialPageRoute(builder: (context) {
+                  return ThumbnailScreen();
                 }));
               }),
         ],

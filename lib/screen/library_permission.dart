@@ -1,30 +1,27 @@
 import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/screen/privacy_notice.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-class LibraryPermissionScreen extends StatelessWidget {
+class LibraryPermissionScreen extends StatefulWidget {
+  @override
+  _LibraryPermissionScreenState createState() =>
+      _LibraryPermissionScreenState();
+}
+
+class _LibraryPermissionScreenState extends State<LibraryPermissionScreen> {
+  bool permission = false;
+    
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
+    return Scaffold(
       backgroundColor: Constant.CloudPhotosYellow,
-      child: LibraryPermissionBody(),
+      body: buildLibraryPermissionBody(),
     );
   }
-}
 
-class LibraryPermissionBody extends StatefulWidget {
-  const LibraryPermissionBody({Key? key}) : super(key: key);
-
-  @override
-  _LibraryPermissionBodyState createState() => _LibraryPermissionBodyState();
-}
-
-class _LibraryPermissionBodyState extends State<LibraryPermissionBody> {
-  bool permission = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget buildLibraryPermissionBody() {
     return SafeArea(
         top: true,
         bottom: true,
@@ -62,7 +59,7 @@ class _LibraryPermissionBodyState extends State<LibraryPermissionBody> {
                     var result = await PhotoManager.requestPermissionExtend();
                     if (result == PermissionState.authorized) {
                       Navigator.of(context).pushReplacement(
-                          CupertinoPageRoute(builder: (context) {
+                          MaterialPageRoute(builder: (context) {
                         return PrivacyNotiveScreen();
                       }));
                     } else {

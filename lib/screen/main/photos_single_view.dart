@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_photos_v2/screen/main/single_photo.dart';
 import 'package:cloud_photos_v2/screen/main/single_video.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class SingleViewScreen extends StatelessWidget {
@@ -16,9 +17,9 @@ class SingleViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
+    return Scaffold(
         backgroundColor: CupertinoColors.black,
-        child: FutureBuilder(
+        body: FutureBuilder(
           future: buildPageView(context),
           builder: (context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {

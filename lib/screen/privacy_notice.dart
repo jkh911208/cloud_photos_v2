@@ -1,38 +1,34 @@
 import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/auth/sign_up.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constant.dart';
 
-class PrivacyNotiveScreen extends StatelessWidget {
+class PrivacyNotiveScreen extends StatefulWidget {
   PrivacyNotiveScreen() {
     updateEntireLibrary();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: Constant.CloudPhotosYellow,
-      child: PrivactNotiveBody(),
-    );
-  }
+  _PrivacyNotiveScreenState createState() => _PrivacyNotiveScreenState();
 }
 
-class PrivactNotiveBody extends StatefulWidget {
-  const PrivactNotiveBody({Key? key}) : super(key: key);
-
-  @override
-  _PrivactNotiveBodyState createState() => _PrivactNotiveBodyState();
-}
-
-class _PrivactNotiveBodyState extends State<PrivactNotiveBody> {
+class _PrivacyNotiveScreenState extends State<PrivacyNotiveScreen> {
   bool first = false;
   bool second = false;
   bool error = false;
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Constant.CloudPhotosYellow,
+      body: buildPrivacyNotiveBody(),
+    );
+  }
+
+  Widget buildPrivacyNotiveBody() {
     return Center(
       child: SingleChildScrollView(
         child: SafeArea(
@@ -149,7 +145,7 @@ class _PrivactNotiveBodyState extends State<PrivactNotiveBody> {
                   onPressed: () {
                     if (first && second) {
                       Navigator.of(context).pushReplacement(
-                          CupertinoPageRoute(builder: (context) {
+                          MaterialPageRoute(builder: (context) {
                         return SignUpScreen();
                       }));
                     } else {

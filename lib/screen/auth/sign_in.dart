@@ -2,33 +2,29 @@ import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/screen/auth/sign_up.dart';
 import 'package:cloud_photos_v2/screen/init_config.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cloud_photos_v2/api.dart';
 
-class SignInScreen extends StatelessWidget {
+class SignInScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: Constant.CloudPhotosYellow,
-      child: SignInBody(),
-    );
-  }
+  _SignInScreenState createState() => _SignInScreenState();
 }
 
-class SignInBody extends StatefulWidget {
-  const SignInBody({Key? key}) : super(key: key);
-
-  @override
-  _SignInBodyState createState() => _SignInBodyState();
-}
-
-class _SignInBodyState extends State<SignInBody> {
+class _SignInScreenState extends State<SignInScreen> {
   String username = "";
   String password = "";
   String error = "";
-
+  
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Constant.CloudPhotosYellow,
+      body: buildSignInBody(),
+    );
+  }
+
+  Widget buildSignInBody() {
     return Center(
       child: SafeArea(
           top: true,
@@ -97,7 +93,7 @@ class _SignInBodyState extends State<SignInBody> {
                             value: response["json"]["access_token"]);
                         print("navigate to config screen");
                         Navigator.of(context).pushReplacement(
-                            CupertinoPageRoute(builder: (context) {
+                            MaterialPageRoute(builder: (context) {
                           return InitConfigScreen();
                         }));
                       } else {
@@ -115,7 +111,7 @@ class _SignInBodyState extends State<SignInBody> {
                   child: Text("Don't have account? Sign up"),
                   onPressed: () {
                     Navigator.of(context)
-                        .pushReplacement(CupertinoPageRoute(builder: (context) {
+                        .pushReplacement(MaterialPageRoute(builder: (context) {
                       return SignUpScreen();
                     }));
                   }),

@@ -122,7 +122,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
               onTap: () async {
                 await storage.deleteAll();
                 Navigator.of(context)
-                    .pushReplacement(CupertinoPageRoute(builder: (context) {
+                    .push(MaterialPageRoute(builder: (context) {
                   return LoadingScreen();
                 }));
               },
@@ -177,11 +177,9 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
       if (thumbnail != null) {
         return GestureDetector(
           onTap: () {
-            Navigator.of(context, rootNavigator: true).push(CupertinoPageRoute(
-                fullscreenDialog: true,
-                builder: (context) {
-                  return SingleViewScreen(photos: photos, index: index);
-                }));
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+              return SingleViewScreen(index: index, photos: photos);
+            }));
           },
           child: Stack(children: [
             Positioned.fill(
