@@ -8,41 +8,42 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 
-class ThumbnailScreen extends StatelessWidget {
+class ThumbnailScreen extends StatefulWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
 
+  @override
+  _ThumbnailScreenState createState() => _ThumbnailScreenState();
+}
+
+class _ThumbnailScreenState extends State<ThumbnailScreen> {
+  List<Map<String, dynamic>> photos = [];
+  bool modalVisible = false;
+  ScrollController scrollController = ScrollController();
+
+  _ThumbnailScreenState() {
+    getAllMedia();
+  }
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: GestureDetector(
-            onTap: () {},
+            onTap: () {
+              setState(() {
+                print(modalVisible);
+                modalVisible = !modalVisible;
+                print(modalVisible);
+              });
+            },
             child: Icon(Icons.menu, color: CupertinoColors.white, size: 25)),
         middle: Text("Photos"),
       ),
       backgroundColor: Constant.CloudPhotosGrey,
-      child: ThumbnailBody(),
+      child: thumbnailBody(),
     );
   }
-}
 
-class ThumbnailBody extends StatefulWidget {
-  const ThumbnailBody({Key? key}) : super(key: key);
-
-  @override
-  _ThumbnailBodyState createState() => _ThumbnailBodyState();
-}
-
-class _ThumbnailBodyState extends State<ThumbnailBody> {
-  List<Map<String, dynamic>> photos = [];
-
-  _ThumbnailBodyState() {
-    getAllMedia();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    ScrollController scrollController = ScrollController();
+  Widget thumbnailBody() {
     return SafeArea(
       bottom: false,
       child: DraggableScrollbar.rrect(
