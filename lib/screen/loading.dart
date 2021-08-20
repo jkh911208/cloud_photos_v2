@@ -45,10 +45,7 @@ Future<int> getNextScreen() async {
   var permission = await Permission.storage.status;
   final storage = new FlutterSecureStorage();
   var token = await storage.read(key: "token");
-
-  print(token);
-  print(permission);
-
+  
   if (permission.isGranted && token != null) {
     return 1;
   } else if (permission.isGranted && token == null) {

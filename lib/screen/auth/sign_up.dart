@@ -305,7 +305,6 @@ class _SignUpBodyState extends State<SignUpBody> {
                       print("make http request to create user");
                       var response = await Api().post("/api/v1/user/signup",
                           {'username': username, 'password': password1});
-                      print(response);
                       if (response["statusCode"] == 201) {
                         final storage = new FlutterSecureStorage();
                         await storage.write(

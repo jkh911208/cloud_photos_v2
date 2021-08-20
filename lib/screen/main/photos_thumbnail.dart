@@ -141,6 +141,6 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
 
     // upload new data to cloud
     int numberOfUpload = await uploadPendingAssets();
-    print(numberOfUpload);
+    print("uploaded $numberOfUpload photos to cloud");
   }
 }

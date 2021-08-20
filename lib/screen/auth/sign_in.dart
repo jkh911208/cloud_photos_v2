@@ -90,7 +90,6 @@ class _SignInBodyState extends State<SignInBody> {
                       print("make http request to login $username");
                       var response = await Api().multipart("/api/v1/user/login",
                           {'username': username, 'password': password});
-                      print(response);
                       if (response["statusCode"] == 200) {
                         final storage = new FlutterSecureStorage();
                         await storage.write(

@@ -108,8 +108,6 @@ class MediaTable {
   Future<Database> getDatabaseObject() async {
     String path = join(await getDatabasesPath(), 'CloudPhotosV$version.db');
     if (await databaseExists(path)) {
-      print("data base exist");
-      print(path);
       return await openDatabase(path, version: version);
     }
     final database = await openDatabase(path, version: version,

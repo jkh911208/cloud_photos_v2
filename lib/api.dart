@@ -40,7 +40,6 @@ class Api {
     var url = Uri.parse(baseUrl + path);
     var response =
         await client.post(url, headers: header, body: json.encode(body));
-    print(response.body);
     Map<String, dynamic> result = {"statusCode": response.statusCode};
     try {
       result["json"] = jsonDecode(response.body);
@@ -55,8 +54,6 @@ class Api {
     await setupAuthHeader("multipart/form-data");
     var url = Uri.parse(baseUrl + path);
     var request = http.MultipartRequest('POST', url);
-    print(path);
-    print(body);
     if (file != null) {
       String? contentType = mime(body["filename"]);
       List typeList = contentType!.split("/");

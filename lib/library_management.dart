@@ -20,7 +20,6 @@ Future<void> updateEntireLibrary() async {
   final AssetPathEntity album = albums.first;
   final List<AssetEntity> assetList =
       await album.getAssetListRange(start: 0, end: album.assetCount);
-  print("updating local library : ${assetList.length}");
 
   assetList.forEach((asset) {
     final String epoch =
@@ -49,7 +48,6 @@ Future<int> uploadPendingAssets() async {
   // start upload file using api
   int uploadNumber = 0;
   pendingAssets.forEach((pending) async {
-    print(pending);
     AssetEntity? asset = await AssetEntity.fromId(pending["localId"]);
     if (asset != null) {
       File? file = await asset.file;
@@ -71,16 +69,12 @@ Future<int> uploadPendingAssets() async {
           Map<String, dynamic> response =
               await Api().multipart("/api/v1/photo/", data, file);
           if (response["statusCode"] == 201) {
-            uploadNumber++;
             // update cloud id
             print(response);
-            // var update = await mediaTable
-            //     .update({"cloudId": response["json"]["id"]}, pending["md5"]);
-            var update = await mediaTable.updateCloudId(
+
+            await mediaTable.updateCloudId(
                 pending["md5"], response["json"]["id"]);
-            print(update);
-            print("after update");
-            print(await mediaTable.selectByMD5(pending["md5"]));
+            uploadNumber++;
           }
         } on Exception {
           print("error uploading");
@@ -88,6 +82,5 @@ Future<int> uploadPendingAssets() async {
       }
     }
   });
-  // await mediaTable.close();
   return uploadNumber;
 }
