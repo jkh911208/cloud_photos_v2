@@ -4,8 +4,22 @@ import 'dart:async';
 
 class MediaTable {
   var db;
-  int version = 6;
+  int version = 1;
   String table = "media";
+
+  Future<List<Map<String, dynamic>>> getPendingAssets() async {
+    if (db == null) {
+      db = await getDatabaseObject();
+    }
+
+    int sevenDaysAgo =
+        DateTime.now().subtract(Duration(days: 7)).millisecondsSinceEpoch;
+    final List<Map<String, dynamic>> result = await db.rawQuery(
+        "select * from media where localId is not null AND cloudId is null AND duration = ? AND createDateTime > ? order by createDateTime ASC",
+        [0, sevenDaysAgo]);
+
+    return result;
+  }
 
   Future<int> selectBiggstModifiedDateTime() async {
     if (db == null) {
@@ -36,7 +50,7 @@ class MediaTable {
     db.insert(
       table,
       data,
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.ignore,
     );
   }
 
@@ -56,10 +70,10 @@ class MediaTable {
       db = await getDatabaseObject();
     }
 
-    final Map<String, dynamic> result =
+    final List<Map<String, dynamic>> result =
         await db.query(table, where: "md5 = ?", whereArgs: [md5]);
 
-    return result;
+    return result.first;
   }
 
   Future<void> deleteByMD5(Map<String, dynamic> data) async {
@@ -69,25 +83,39 @@ class MediaTable {
     await db.delete(table, where: 'md5 = ?', whereArgs: [data["md5"]]);
   }
 
-  Future<void> update(Map<String, dynamic> data) async {
+  Future updateCloudId(String md5, String cloudId) async {
     if (db == null) {
       db = await getDatabaseObject();
     }
 
-    await db.update(
+    return await db.rawUpdate(
+        'UPDATE media SET cloudId = ? WHERE md5 = ?', [cloudId, md5]);
+  }
+
+  Future update(Map<String, dynamic> data, String whereArg) async {
+    if (db == null) {
+      db = await getDatabaseObject();
+    }
+
+    return await db.update(
       table,
       data,
       where: 'md5 = ?',
-      whereArgs: [data["md5"]],
+      whereArgs: [whereArg],
     );
   }
 
   Future<Database> getDatabaseObject() async {
-    final database = await openDatabase(
-        join(await getDatabasesPath(), 'CloudPhotosV$version.db'),
-        version: version, onCreate: (db, version) async {
+    String path = join(await getDatabasesPath(), 'CloudPhotosV$version.db');
+    if (await databaseExists(path)) {
+      print("data base exist");
+      print(path);
+      return await openDatabase(path, version: version);
+    }
+    final database = await openDatabase(path, version: version,
+        onCreate: (db, version) async {
       await db.execute("""
-        CREATE TABLE media
+        CREATE TABLE if not exists media
         (
           md5 text primary key not null UNIQUE, 
           duration integer not null, 
@@ -108,5 +136,9 @@ class MediaTable {
           "CREATE INDEX if not exists modified_time on media (modifiedDateTime);");
     });
     return database;
+  }
+
+  Future<void> close() async {
+    await db.close();
   }
 }

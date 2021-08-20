@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/database.dart';
+import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/main/photos_single_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -125,12 +126,21 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
   }
 
   Future<void> getAllMedia() async {
+    await updateEntireLibrary();
     print("get all media");
-    final MediaTable mediaTable = new MediaTable();
+    final MediaTable mediaTable = new MediaTable();    
     final List<Map<String, dynamic>> assetList = await mediaTable.selectAll();
 
     setState(() {
       photos = assetList;
     });
+
+    // get new data from cloud
+
+    // set state if new data downloaded
+
+    // upload new data to cloud
+    int numberOfUpload = await uploadPendingAssets();
+    print(numberOfUpload);
   }
 }

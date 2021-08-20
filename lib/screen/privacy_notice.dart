@@ -1,4 +1,4 @@
-import 'package:cloud_photos_v2/local_library.dart';
+import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/auth/sign_up.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:url_launcher/url_launcher.dart';
