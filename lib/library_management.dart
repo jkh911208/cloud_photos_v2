@@ -9,6 +9,7 @@ import 'package:cloud_photos_v2/database.dart';
 Future<void> updateEntireLibrary() async {
   final MediaTable mediaTable = new MediaTable();
   final int biggestmodified = await mediaTable.selectBiggstModifiedDateTime();
+  print("current biggest modified $biggestmodified");
 
   final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
       onlyAll: true,
@@ -18,12 +19,16 @@ Future<void> updateEntireLibrary() async {
               min: DateTime.fromMillisecondsSinceEpoch(biggestmodified),
               max: DateTime.now())));
   final AssetPathEntity album = albums.first;
+  if (album.assetCount == 0) {
+    return;
+  }
   final List<AssetEntity> assetList =
       await album.getAssetListRange(start: 0, end: album.assetCount);
 
   assetList.forEach((asset) {
     final String epoch =
         asset.modifiedDateTime.millisecondsSinceEpoch.toString();
+    print("new modified $epoch");
     final String id = asset.id;
     final List<int> bytes = utf8.encode("CloudPhotos,id:$id,epoch:$epoch");
     final String simpleMD5 = md5.convert(bytes).toString();
