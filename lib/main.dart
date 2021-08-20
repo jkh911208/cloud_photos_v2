@@ -4,6 +4,7 @@ import 'package:cloud_photos_v2/screen/loading.dart';
 import 'package:cloud_photos_v2/screen/privacy_notice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
@@ -16,7 +17,7 @@ void main() async {
   }
 
   runApp(
-    CupertinoApp(
+    MaterialApp(
       home: CloudPhotos(),
       debugShowCheckedModeBanner: false,
       routes: <String, WidgetBuilder>{
