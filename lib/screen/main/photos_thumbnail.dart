@@ -14,7 +14,15 @@ class ThumbnailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-        backgroundColor: Constant.CloudPhotosGrey, child: ThumbnailBody());
+      navigationBar: CupertinoNavigationBar(
+        leading: GestureDetector(
+            onTap: () {},
+            child: Icon(Icons.menu, color: CupertinoColors.white, size: 25)),
+        middle: Text("Photos"),
+      ),
+      backgroundColor: Constant.CloudPhotosGrey,
+      child: ThumbnailBody(),
+    );
   }
 }
 
@@ -36,6 +44,7 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
   Widget build(BuildContext context) {
     ScrollController scrollController = ScrollController();
     return SafeArea(
+      bottom: false,
       child: DraggableScrollbar.rrect(
         scrollbarTimeToFade: Duration(seconds: 5),
         controller: scrollController,
@@ -128,7 +137,7 @@ class _ThumbnailBodyState extends State<ThumbnailBody> {
   Future<void> getAllMedia() async {
     await updateEntireLibrary();
     print("get all media");
-    final MediaTable mediaTable = new MediaTable();    
+    final MediaTable mediaTable = new MediaTable();
     final List<Map<String, dynamic>> assetList = await mediaTable.selectAll();
 
     setState(() {
