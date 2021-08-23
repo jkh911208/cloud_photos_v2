@@ -174,8 +174,42 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                       );
                     }));
                   },
-                  child: thumbnailBuilder(index));
+                  child: Stack(
+                    children: [
+                      Positioned.fill(child: thumbnailBuilder(index)),
+                      isVideo(index),
+                      uploadStatus(index)
+                    ],
+                  ));
             }),
+      ),
+    );
+  }
+
+  Widget uploadStatus(int index) {
+    IconData _currentIcon = Icons.cloud_done_outlined;
+    if (photos[index]["localId"] == null) {
+      _currentIcon = Icons.cloud_download_outlined;
+    } else if (photos[index]["localId"] != null &&
+        photos[index]["cloudId"] == null) {
+      if (photos[index]["createDateTime"] >
+          DateTime.now().subtract(Duration(days: 7)).millisecondsSinceEpoch) {
+        _currentIcon = Icons.cloud_upload_outlined;
+      } else {
+        _currentIcon = Icons.cloud_off_outlined;
+      }
+    }
+    if (photos[index]["duration"] > 0) {
+      _currentIcon = Icons.cloud_off_outlined;
+    }
+
+    return Align(
+      alignment: Alignment.topRight,
+      child: Container(
+        decoration: BoxDecoration(
+            color: CupertinoColors.white,
+            borderRadius: BorderRadius.all(Radius.circular(20))),
+        child: Icon(_currentIcon, size: 20),
       ),
     );
   }
@@ -229,15 +263,11 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     if (asset != null) {
       Uint8List? thumbnail = await asset.thumbData;
       if (thumbnail != null) {
-        return Stack(children: [
-          Positioned.fill(
-              child: Image.memory(
-            thumbnail,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-          )),
-          isVideo(index)
-        ]);
+        return Image.memory(
+          thumbnail,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+        );
       }
     }
     return Container();
@@ -256,11 +286,12 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
       return Align(
           alignment: Alignment.bottomLeft,
           child: Container(
+            width: MediaQuery.of(context).size.width / 4 * 0.55,
+            decoration: BoxDecoration(
+                color: CupertinoColors.white,
+                borderRadius: BorderRadius.all(Radius.circular(20))),
             child: Row(children: [
-              Icon(
-                CupertinoIcons.play,
-                color: CupertinoColors.black,
-              ),
+              Icon(CupertinoIcons.play, color: CupertinoColors.black, size: 15),
               Text("$min:$seconds")
             ]),
           ));
