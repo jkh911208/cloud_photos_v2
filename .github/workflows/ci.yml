@@ -49,6 +49,10 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
           SECRET: ${{ secrets.SECRET }}
         run: python scripts/create_env.py
+      - name: change build number
+        env:
+          BUILD_NUM: ${{github.run_number}}
+        run: python scripts/change_build_number.py
       - uses: actions/setup-java@v1
         with:
           java-version: "12.x"
