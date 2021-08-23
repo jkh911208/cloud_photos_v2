@@ -248,7 +248,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
         "Authorization": "Bearer $token",
         "X-Custom-Auth": issueJwtHS256(
             JwtClaim(otherClaims: {
-              "requested_time": DateTime.now().millisecondsSinceEpoch.toString()
+              "timestamp": DateTime.now().millisecondsSinceEpoch.toString()
             }),
             secret)
       },

@@ -29,7 +29,7 @@ class Api {
     // frontend verification token
     header["X-Custom-Auth"] = issueJwtHS256(
         JwtClaim(otherClaims: {
-          "requested_time": DateTime.now().millisecondsSinceEpoch.toString()
+          "timestamp": DateTime.now().millisecondsSinceEpoch.toString()
         }),
         secret);
   }
