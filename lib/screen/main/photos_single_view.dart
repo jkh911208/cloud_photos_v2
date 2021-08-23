@@ -140,7 +140,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
         "Authorization": "Bearer ${widget.token}",
         "X-Custom-Auth": issueJwtHS256(
             JwtClaim(otherClaims: {
-              "timestamp": DateTime.now().millisecondsSinceEpoch.toString()
+              "timestamp": DateTime.now().millisecondsSinceEpoch
             }),
             widget.secret)
       },
