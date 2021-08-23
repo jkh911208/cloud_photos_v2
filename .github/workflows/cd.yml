@@ -138,13 +138,6 @@ jobs:
          flutter build ios --release --no-codesign
          xcode-project build-ipa --workspace ios/Runner.xcworkspace --scheme Runner --config Release
 
-      # - name: collect ipa artifacts
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: adhoc-ipa
-      #     # Path to the release files
-      #     path: build/ios/ipa/*.ipa
-
       - name: Upload app to App Store Connect
         env:
           APP_STORE_CONNECT_USERNAME: ${{ secrets.APP_STORE_CONNECT_USERNAME }}
