@@ -40,6 +40,7 @@ dependencies:
   draggable_scrollbar: ^0.1.0
   jaguar_jwt: ^3.0.0
   mime_type: ^1.0.0
+  package_info: ^2.0.2
 
 dev_dependencies:
   flutter_test:

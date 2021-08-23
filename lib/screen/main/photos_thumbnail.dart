@@ -13,6 +13,7 @@ import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
+import 'package:package_info/package_info.dart';
 
 class ThumbnailScreen extends StatefulWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -106,6 +107,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
         username = payloadMap["username"];
       }
     }
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
     return Container(
       width: MediaQuery.of(context).size.width * 0.8,
@@ -141,7 +143,12 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                   return LoadingScreen();
                 }));
               },
-            )
+            ),
+            Divider(),
+            ListTile(
+              title: Text(
+                  "Version: ${packageInfo.version}+${packageInfo.buildNumber}"),
+            ),
           ],
         ),
       ),
