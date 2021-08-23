@@ -341,5 +341,11 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     // upload new data to cloud
     int numberOfUpload = await uploadPendingAssets();
     print("uploaded $numberOfUpload photos to cloud");
+
+    if (numberOfUpload > 0) {
+      setState(() async {
+        photos = await mediaTable.selectAll();
+      });
+    }
   }
 }
