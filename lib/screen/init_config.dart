@@ -1,5 +1,6 @@
 import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/screen/main/photos_thumbnail.dart';
+import 'package:cloud_photos_v2/storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -84,6 +85,6 @@ class _InitConfigScreenState extends State<InitConfigScreen> {
   }
 
   Future<void> setConfig() async {
-    await storage.write(key: "wifiOnly", value: wifiOnly.toString());
+    await setWifiOnly(wifiOnly);
   }
 }

@@ -1,14 +1,18 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:cloud_photos_v2/api.dart';
 import 'package:cloud_photos_v2/database.dart';
 import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/loading.dart';
 import 'package:cloud_photos_v2/screen/main/photos_single_view.dart';
+import 'package:cloud_photos_v2/storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:jaguar_jwt/jaguar_jwt.dart';
 
 class ThumbnailScreen extends StatefulWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -23,10 +27,15 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   bool wifiOnly = true;
   final storage = new FlutterSecureStorage();
+  final MediaTable mediaTable = new MediaTable();
+  final Api api = Api();
+  String baseUrl = dotenv.get('API_URL', fallback: 'http://localhost');
+  String secret = dotenv.get('SECRET', fallback: 'yoursecret');
+  String token = "";
 
   _ThumbnailScreenState() {
     getAllMedia();
-    updateWifiOnly();
+    updateData();
   }
   @override
   Widget build(BuildContext context) {
@@ -110,7 +119,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                 leading: CupertinoSwitch(
                     value: wifiOnly,
                     onChanged: (bool value) async {
-                      storage.write(key: "wifiOnly", value: value.toString());
+                      await setWifiOnly(value);
                       setState(() {
                         wifiOnly = value;
                       });
@@ -120,7 +129,12 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
             ListTile(
               title: Text("Sign Out"),
               onTap: () async {
+                // delete local store
                 await storage.deleteAll();
+
+                // delete all data in db
+                await mediaTable.truncateTable();
+
                 Navigator.of(context)
                     .push(MaterialPageRoute(builder: (context) {
                   return LoadingScreen();
@@ -147,7 +161,20 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                 SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
             itemCount: photos.length,
             itemBuilder: (BuildContext context, int index) {
-              return thumbnailBuilder(index);
+              return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(builder: (context) {
+                      return SingleViewScreen(
+                        index: index,
+                        photos: photos,
+                        baseUrl: baseUrl,
+                        secret: secret,
+                        token: token,
+                      );
+                    }));
+                  },
+                  child: thumbnailBuilder(index));
             }),
       ),
     );
@@ -166,36 +193,54 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
             );
           });
     }
-    return Text("Cloud data");
+    return FutureBuilder(
+        future: cloudThumbnailBuilder(index),
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            return snapshot.data;
+          }
+          return Center(
+            child: CupertinoActivityIndicator(),
+          );
+        });
+  }
+
+  Future<Widget> cloudThumbnailBuilder(int index) async {
+    String cloudId = photos[index]["cloudId"];
+    return Image.network(
+      "$baseUrl/api/v1/photo/$cloudId-thumbnail.jpeg",
+      headers: {
+        "Authorization": "Bearer $token",
+        "X-Custom-Auth": issueJwtHS256(
+            JwtClaim(otherClaims: {
+              "requested_time": DateTime.now().millisecondsSinceEpoch.toString()
+            }),
+            secret)
+      },
+      fit: BoxFit.cover,
+      gaplessPlayback: true,
+    );
   }
 
   Future<Widget> localThumbnailBuilder(int index) async {
     String id = photos[index]["localId"];
+    // print(photos[index]);
     AssetEntity? asset = await AssetEntity.fromId(id);
     if (asset != null) {
       Uint8List? thumbnail = await asset.thumbData;
       if (thumbnail != null) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-              return SingleViewScreen(index: index, photos: photos);
-            }));
-          },
-          child: Stack(children: [
-            Positioned.fill(
-                child: Image.memory(
-              thumbnail,
-              fit: BoxFit.cover,
-              gaplessPlayback: true,
-            )),
-            isVideo(index)
-          ]),
-        );
+        return Stack(children: [
+          Positioned.fill(
+              child: Image.memory(
+            thumbnail,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+          )),
+          isVideo(index)
+        ]);
       }
     }
-    return Center(
-      child: CupertinoActivityIndicator(),
-    );
+    return Container();
   }
 
   Widget isVideo(int index) {
@@ -223,31 +268,20 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     return Container();
   }
 
-  Future<void> updateWifiOnly() async {
-    final _wifiOnly = await storage.read(key: "wifiOnly");
-    if (_wifiOnly != null) {
-      if (_wifiOnly == "true") {
-        setState(() {
-          wifiOnly = true;
-        });
-        return;
-      }
-
-      setState(() {
-        wifiOnly = false;
-      });
-      return;
-    }
+  Future<void> updateData() async {
+    final bool _wifiOnly = await getWifiOnly();
     setState(() {
-      wifiOnly = true;
+      wifiOnly = _wifiOnly;
     });
-    return;
+    String? _token = await storage.read(key: "token");
+    if (_token != null) {
+      token = _token;
+    }
   }
 
   Future<void> getAllMedia() async {
     await updateEntireLibrary();
     print("get all media");
-    final MediaTable mediaTable = new MediaTable();
     final List<Map<String, dynamic>> assetList = await mediaTable.selectAll();
 
     setState(() {
@@ -255,8 +289,22 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     });
 
     // get new data from cloud
+    await getFromCloud();
 
     // set state if new data downloaded
+    final List<Map<String, dynamic>> assetListAfterDownload =
+        await mediaTable.selectAll();
+    if (assetList.length != assetListAfterDownload.length) {
+      print("new data downloaded from cloud");
+      setState(() {
+        photos = assetListAfterDownload;
+      });
+      assetListAfterDownload.forEach((element) {
+        if (element["localId"] == null) {
+          print(element);
+        }
+      });
+    }
 
     // upload new data to cloud
     int numberOfUpload = await uploadPendingAssets();

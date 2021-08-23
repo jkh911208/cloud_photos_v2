@@ -4,13 +4,23 @@ import 'package:cloud_photos_v2/screen/main/single_video.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:jaguar_jwt/jaguar_jwt.dart';
 
 class SingleViewScreen extends StatelessWidget {
   final int index;
   final List<Map<String, dynamic>> photos;
   late final PageController pageController;
+  final String baseUrl;
+  final String secret;
+  final String token;
 
-  SingleViewScreen({Key? key, required this.index, required this.photos})
+  SingleViewScreen(
+      {Key? key,
+      required this.index,
+      required this.photos,
+      required this.secret,
+      required this.baseUrl,
+      required this.token})
       : super(key: key) {
     pageController = PageController(initialPage: index);
   }
@@ -71,11 +81,19 @@ class SingleViewScreen extends StatelessWidget {
         }
       }
     }
-    return Center(
-      child: Text(
-        "$position",
-        style: TextStyle(color: CupertinoColors.activeBlue),
-      ),
+    String cloudId = photos[position]["cloudId"];
+    return Image.network(
+      "$baseUrl/api/v1/photo/$cloudId-resize.jpeg",
+      headers: {
+        "Authorization": "Bearer $token",
+        "X-Custom-Auth": issueJwtHS256(
+            JwtClaim(otherClaims: {
+              "requested_time": DateTime.now().millisecondsSinceEpoch.toString()
+            }),
+            secret)
+      },
+      fit: BoxFit.contain,
+      gaplessPlayback: true,
     );
   }
 

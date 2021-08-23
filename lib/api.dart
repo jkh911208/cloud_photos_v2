@@ -34,6 +34,19 @@ class Api {
         secret);
   }
 
+  Future<Map<String, dynamic>> get(String path) async {
+    await setupAuthHeader();
+    var url = Uri.parse(baseUrl + path);
+    var response = await client.get(url, headers: header);
+    Map<String, dynamic> result = {"statusCode": response.statusCode};
+    try {
+      result["json"] = jsonDecode(response.body);
+    } on Exception {
+      result["body"] = response.body;
+    }
+    return result;
+  }
+
   Future<Map<String, dynamic>> post(
       String path, Map<String, dynamic> body) async {
     await setupAuthHeader();

@@ -4,7 +4,7 @@ import 'dart:async';
 
 class MediaTable {
   var db;
-  int version = 1;
+  int version = 2;
   String table = "media";
 
   Future<List<Map<String, dynamic>>> getPendingAssets() async {
@@ -21,20 +21,22 @@ class MediaTable {
     return result;
   }
 
-  Future<int> selectBiggstModifiedDateTime() async {
+  Future<int> selectBiggstModifiedDateTimeLocal() async {
     if (db == null) {
       db = await getDatabaseObject();
     }
-    // Database _db = db;
-    final List<Map<String, dynamic>> result =
-        await db.query(table, limit: 1, orderBy: "modifiedDateTime DESC");
+    final List<Map<String, dynamic>> result = await db.query(table,
+        where: "localId is not ?",
+        whereArgs: ["null"],
+        limit: 1,
+        orderBy: "modifiedDateTime DESC");
     if (result.length == 0) {
       return 0;
     }
     return result[0]["modifiedDateTime"];
   }
 
-  Future<void> dropTable() async {
+  Future<void> truncateTable() async {
     if (db == null) {
       db = await getDatabaseObject();
     }
@@ -73,7 +75,10 @@ class MediaTable {
     final List<Map<String, dynamic>> result =
         await db.query(table, where: "md5 = ?", whereArgs: [md5]);
 
-    return result.first;
+    if (result.length > 0) {
+      return result.first;
+    }
+    return {};
   }
 
   Future<void> deleteByMD5(Map<String, dynamic> data) async {
@@ -115,10 +120,10 @@ class MediaTable {
       await db.execute("""
         CREATE TABLE if not exists media
         (
-          md5 text primary key not null UNIQUE, 
-          duration integer not null, 
+          md5 text primary key not null UNIQUE,
+          duration integer not null,
           createDateTime datetime not null,
-          modifiedDateTime datetime not null,
+          modifiedDateTime datetime,
           cloudId text UNIQUE,
           localId text UNIQUE
         );

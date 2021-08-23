@@ -1,14 +1,47 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:cloud_photos_v2/storage.dart';
 import 'package:path/path.dart';
 import 'package:cloud_photos_v2/api.dart';
 import 'package:crypto/crypto.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:cloud_photos_v2/database.dart';
 
+Future<void> getFromCloud() async {
+  final MediaTable mediaTable = new MediaTable();
+
+  // get biggest modified
+  int biggestCloudCreated = await getCloudCreatedEpoch();
+  print("cloud biggest created $biggestCloudCreated");
+
+  // make api call to get list of images
+  Map<String, dynamic> response =
+      await Api().get("/api/v1/photo/list/$biggestCloudCreated");
+
+  // write to db
+  if (response["statusCode"] == 200) {
+    for (var i = 0; i < response["json"]["result"].length; i++) {
+      Map<String, dynamic> current = response["json"]["result"][i];
+      print(current);
+      if ((await mediaTable.selectByMD5(current["md5"])).length == 0) {
+        mediaTable.insert({
+          "md5": current["md5"],
+          "duration": current["duration"].toInt(),
+          "createDateTime": current["original_datetime"],
+          "modifiedDateTime": null,
+          "cloudId": current["id"],
+          "localId": null
+        });
+      }
+      await writeCloudCreatedEpoch(current["created"]);
+    }
+  }
+}
+
 Future<void> updateEntireLibrary() async {
   final MediaTable mediaTable = new MediaTable();
-  final int biggestmodified = await mediaTable.selectBiggstModifiedDateTime();
+  final int biggestmodified =
+      await mediaTable.selectBiggstModifiedDateTimeLocal();
   print("current biggest modified $biggestmodified");
 
   final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
@@ -28,7 +61,6 @@ Future<void> updateEntireLibrary() async {
   assetList.forEach((asset) {
     final String epoch =
         asset.modifiedDateTime.millisecondsSinceEpoch.toString();
-    print("new modified $epoch");
     final String id = asset.id;
     final List<int> bytes = utf8.encode("CloudPhotos,id:$id,epoch:$epoch");
     final String simpleMD5 = md5.convert(bytes).toString();
