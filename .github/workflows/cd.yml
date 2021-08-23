@@ -1,9 +1,5 @@
 name: CI
 on:
-  pull_request:
-    branches:
-      - master
-      - main
   push:
     branches:
       - master
@@ -88,10 +84,39 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Create Folder for certificates and profiles
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          mkdir -p ~/Library/MobileDevice/Certificates/
+
+      - name: Get Certificate
+        id: certFileDecode
+        uses: timheuer/base64-to-file@v1.0.3
+        with:
+          fileName: 'certificate.p12'
+          encodedString: ${{ secrets.P12_BASE64 }}
+      - name: Copy Certificate
+        run: mv ${{ steps.certFileDecode.outputs.filePath }} ~/Library/MobileDevice/Certificates/certificate.p12
+       
+      - name: Get Profile
+        id: profFileDecode
+        uses: timheuer/base64-to-file@v1.0.3
+        with:
+          fileName: 'decoded.mobileprovision'
+          encodedString: ${{ secrets.MOBILEPROVISION_BASE64 }}
+      - name: Copy Profiles
+        run: mv ${{ steps.profFileDecode.outputs.filePath }} ~/Library/MobileDevice/Provisioning\ Profiles/decoded.mobileprovision
+
       - name: setup python
         uses: actions/setup-python@v2
         with:
           python-version: "3.8"
+      - name: Install python dependencies
+        run:  python -m pip install codemagic-cli-tools
+      - name: Initialize Keychain with certificate
+        run: |
+          keychain initialize
+          keychain add-certificates --certificate ~/Library/MobileDevice/Certificates/certificate.p12 --certificate-password ${{ secrets.cert_password }}
       - name: create .env file
         env:
           API_URL: ${{ secrets.API_URL }}
@@ -108,5 +133,14 @@ jobs:
         with:
           channel: "stable"
       - run: flutter pub get
-      - run: flutter clean
-      - run: flutter build ios --release --no-codesign
+      - run: |
+         xcode-project use-profiles
+         flutter build ios --release --no-codesign
+         xcode-project build-ipa --workspace ios/Runner.xcworkspace --scheme Runner --config Release
+
+      - name: collect ipa artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: adhoc-ipa
+          # Path to the release files
+          path: build/ios/ipa/*.ipa
