@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 
-class SingleViewScreen extends StatelessWidget {
+class SingleViewScreen extends StatefulWidget {
   final int index;
   final List<Map<String, dynamic>> photos;
   late final PageController pageController;
@@ -26,6 +26,16 @@ class SingleViewScreen extends StatelessWidget {
   }
 
   @override
+  _SingleViewScreenState createState() =>
+      _SingleViewScreenState(currentPosition: index);
+}
+
+class _SingleViewScreenState extends State<SingleViewScreen> {
+  int currentPosition;
+
+  _SingleViewScreenState({required this.currentPosition});
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: CupertinoColors.black,
@@ -43,54 +53,96 @@ class SingleViewScreen extends StatelessWidget {
   }
 
   Future<Widget> buildPageView(BuildContext context) async {
-    return Stack(children: [
-      SafeArea(
-        child: PageView.builder(
-            controller: pageController,
-            allowImplicitScrolling: true, // allows caching next page
-            itemCount: photos.length,
-            itemBuilder: (_, position) {
-              return FutureBuilder(
-                  future: buildSingleView(position),
-                  builder: (_, AsyncSnapshot snapshot) {
-                    if (snapshot.hasData) {
-                      return snapshot.data;
-                    }
-                    return Center(
-                      child: CupertinoActivityIndicator(),
-                    );
-                  });
-            }),
+    return SafeArea(
+      bottom: false,
+      child: Stack(
+        children: [
+          uploadStatus(),
+          PageView.builder(
+              onPageChanged: (int newPosition) {
+                setState(() {
+                  currentPosition = newPosition;
+                });
+              },
+              controller: widget.pageController,
+              allowImplicitScrolling: true, // allows caching next page
+              itemCount: widget.photos.length,
+              itemBuilder: (_, position) {
+                return FutureBuilder(
+                    future: buildSingleView(position),
+                    builder: (_, AsyncSnapshot snapshot) {
+                      if (snapshot.hasData) {
+                        return snapshot.data;
+                      }
+                      return Center(
+                        child: CupertinoActivityIndicator(),
+                      );
+                    });
+              }),
+          customFooter(context)
+        ],
       ),
-      customFooter(context)
-    ]);
+    );
+  }
+
+  Widget uploadStatus() {
+    IconData _currentIcon = Icons.cloud_done_outlined;
+    if (widget.photos[currentPosition]["localId"] == null) {
+      _currentIcon = Icons.cloud_download_outlined;
+    } else if (widget.photos[currentPosition]["localId"] != null &&
+        widget.photos[currentPosition]["cloudId"] == null) {
+      if (widget.photos[currentPosition]["createDateTime"] >
+          DateTime.now().subtract(Duration(days: 7)).millisecondsSinceEpoch) {
+        _currentIcon = Icons.cloud_upload_outlined;
+      } else {
+        _currentIcon = Icons.cloud_off_outlined;
+      }
+    }
+    if (widget.photos[currentPosition]["duration"] > 0) {
+      _currentIcon = Icons.cloud_off_outlined;
+    }
+
+    return Align(
+      alignment: Alignment.topRight,
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Container(
+          child: Icon(
+            _currentIcon,
+            size: 20,
+            color: CupertinoColors.white,
+          ),
+        ),
+      ),
+    );
   }
 
   Future<Widget> buildSingleView(int position) async {
-    if (photos[position]["localId"] != null) {
+    if (widget.photos[position]["localId"] != null) {
       AssetEntity? asset =
-          await AssetEntity.fromId(photos[position]["localId"]);
+          await AssetEntity.fromId(widget.photos[position]["localId"]);
       if (asset != null) {
         File? file = await asset.file;
         if (file != null) {
-          if (photos[position]["duration"] == 0) {
+          if (widget.photos[position]["duration"] == 0) {
             return SinglePhoto(file: file);
           } else {
-            return SingleVideo(file: file, pageController: pageController);
+            return SingleVideo(
+                file: file, pageController: widget.pageController);
           }
         }
       }
     }
-    String cloudId = photos[position]["cloudId"];
+    String cloudId = widget.photos[position]["cloudId"];
     return Image.network(
-      "$baseUrl/api/v1/photo/$cloudId-resize.jpeg",
+      "${widget.baseUrl}/api/v1/photo/$cloudId-resize.jpeg",
       headers: {
-        "Authorization": "Bearer $token",
+        "Authorization": "Bearer ${widget.token}",
         "X-Custom-Auth": issueJwtHS256(
             JwtClaim(otherClaims: {
               "requested_time": DateTime.now().millisecondsSinceEpoch.toString()
             }),
-            secret)
+            widget.secret)
       },
       fit: BoxFit.contain,
       gaplessPlayback: true,
@@ -121,7 +173,7 @@ class SingleViewScreen extends StatelessWidget {
               ),
               CupertinoButton(
                 onPressed: () {
-                  print(pageController.page);
+                  print(widget.pageController.page);
                 },
                 child: Icon(
                   CupertinoIcons.trash,
