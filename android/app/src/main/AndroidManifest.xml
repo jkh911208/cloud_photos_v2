@@ -8,7 +8,7 @@
       </intent>
     </queries>
    <application
-        android:label="cloud_photos_v2"
+        android:label="Cloud Photos"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:allowBackup="false"

@@ -58,6 +58,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   CupertinoNavigationBar buildAppBar() {
     return CupertinoNavigationBar(
       backgroundColor: CupertinoColors.black,
+      leading: Container(),
       trailing: GestureDetector(
           onTap: () {
             setState(() {

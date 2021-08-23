@@ -51,6 +51,9 @@ Future<void> updateEntireLibrary() async {
           updateTimeCond: DateTimeCond(
               min: DateTime.fromMillisecondsSinceEpoch(biggestmodified),
               max: DateTime.now())));
+  if (albums.length == 0) {
+    return;
+  }
   final AssetPathEntity album = albums.first;
   if (album.assetCount == 0) {
     return;
