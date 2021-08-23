@@ -58,8 +58,8 @@ jobs:
         with:
           fileName: key.jks
           encodedString: ${{ secrets.ANDROID_KEY_JKS_BASE64 }}
-      - name: Create Android keystore
-        id: android_keystore
+      - name: Create Android key properties
+        id: android_key_properties
         uses: timheuer/base64-to-file@v1.0.3
         with:
           fileName: android/key.properties
