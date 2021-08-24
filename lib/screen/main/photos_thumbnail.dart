@@ -139,7 +139,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                 await mediaTable.truncateTable();
 
                 Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
+                    .pushReplacement(MaterialPageRoute(builder: (context) {
                   return LoadingScreen();
                 }));
               },
