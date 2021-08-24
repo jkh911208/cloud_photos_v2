@@ -57,7 +57,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
       bottom: false,
       child: Stack(
         children: [
-          uploadStatus(),
+          assetDetails(),
           PageView.builder(
               onPageChanged: (int newPosition) {
                 setState(() {
@@ -85,7 +85,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
     );
   }
 
-  Widget uploadStatus() {
+  Widget assetDetails() {
     IconData _currentIcon = Icons.cloud_done_outlined;
     if (widget.photos[currentPosition]["localId"] == null) {
       _currentIcon = Icons.cloud_download_outlined;
@@ -107,10 +107,25 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Container(
-          child: Icon(
-            _currentIcon,
-            size: 20,
-            color: CupertinoColors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Text(
+                  DateTime.fromMillisecondsSinceEpoch(
+                          widget.photos[currentPosition]["createDateTime"])
+                      .toString()
+                      .substring(0, 16),
+                  style: TextStyle(color: CupertinoColors.white),
+                ),
+              ),
+              Icon(
+                _currentIcon,
+                size: 20,
+                color: CupertinoColors.white,
+              ),
+            ],
           ),
         ),
       ),
