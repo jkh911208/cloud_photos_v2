@@ -159,6 +159,14 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     return SafeArea(
       bottom: false,
       child: DraggableScrollbar.rrect(
+        labelTextBuilder: (double offset) {
+          int currentLine = offset ~/ 100;
+          List<String> date = DateTime.fromMillisecondsSinceEpoch(
+                  photos[currentLine * 4]["createDateTime"])
+              .toString()
+              .split("-");
+          return Text(date[1] + "/" + date[0]);
+        },
         scrollbarTimeToFade: Duration(seconds: 5),
         controller: scrollController,
         child: GridView.builder(
