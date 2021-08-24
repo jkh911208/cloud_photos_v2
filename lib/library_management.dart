@@ -22,7 +22,6 @@ Future<void> getFromCloud() async {
   if (response["statusCode"] == 200) {
     for (var i = 0; i < response["json"]["result"].length; i++) {
       Map<String, dynamic> current = response["json"]["result"][i];
-      print(current);
       if ((await mediaTable.selectByMD5(current["md5"])).length == 0) {
         final List<Map<String, dynamic>> matchingCreateDateTime =
             await mediaTable.selectBycreateDateTime(
@@ -30,11 +29,12 @@ Future<void> getFromCloud() async {
         bool locallyExist = false;
         matchingCreateDateTime.forEach((element) async {
           final List<int> bytes = utf8.encode(
-              "CloudPhotos,id:${element["localId"]},epoch:${element["creationTime"]}");
+              "CloudPhotos,id:${element["localId"]},epoch:${element["createDateTime"].toString()}");
           final String simpleMD5 = md5.convert(bytes).toString();
           if (simpleMD5 == element["md5"]) {
-            await mediaTable.updateCloudId(element["md5"], current["id"]);
+            print("md5 is matching as well");
             locallyExist = true;
+            await mediaTable.updateCloudId(element["md5"], current["id"]);
           }
         });
         if (locallyExist == false) {

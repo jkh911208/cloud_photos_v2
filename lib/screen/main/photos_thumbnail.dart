@@ -320,34 +320,23 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
 
   Future<void> getAllMedia() async {
     await updateEntireLibrary();
-    print("get all media");
-    final List<Map<String, dynamic>> assetList = await mediaTable.selectAll();
-
+    List<Map<String, dynamic>> assetList = await mediaTable.selectAll();
     setState(() {
       photos = assetList;
     });
 
     // get new data from cloud
     await getFromCloud();
-
-    // set state if new data downloaded
-    final List<Map<String, dynamic>> assetListAfterDownload =
-        await mediaTable.selectAll();
-    if (assetList.length != assetListAfterDownload.length) {
-      print("new data downloaded from cloud");
-      setState(() {
-        photos = assetListAfterDownload;
-      });
-    }
+    assetList = await mediaTable.selectAll();
+    setState(() {
+      photos = assetList;
+    });
 
     // upload new data to cloud
-    int numberOfUpload = await uploadPendingAssets();
-    print("uploaded $numberOfUpload photos to cloud");
-
-    if (numberOfUpload > 0) {
-      setState(() async {
-        photos = await mediaTable.selectAll();
-      });
-    }
+    await uploadPendingAssets();
+    assetList = await mediaTable.selectAll();
+    setState(() {
+      photos = assetList;
+    });
   }
 }
