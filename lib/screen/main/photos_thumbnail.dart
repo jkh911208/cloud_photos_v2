@@ -196,19 +196,29 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
 
   Widget uploadStatus(int index) {
     IconData _currentIcon = Icons.cloud_done_outlined;
+    Color _color = CupertinoColors.activeGreen;
+
     if (photos[index]["localId"] == null) {
+      // downloaded from cloud
       _currentIcon = Icons.cloud_download_outlined;
+      _color = CupertinoColors.activeBlue;
     } else if (photos[index]["localId"] != null &&
         photos[index]["cloudId"] == null) {
       if (photos[index]["createDateTime"] >
           DateTime.now().subtract(Duration(days: 7)).millisecondsSinceEpoch) {
+        // pending upload
         _currentIcon = Icons.cloud_upload_outlined;
+        _color = CupertinoColors.activeOrange;
       } else {
+        // older than 7 days
         _currentIcon = Icons.cloud_off_outlined;
+        _color = CupertinoColors.black;
       }
     }
     if (photos[index]["duration"] > 0) {
+      // video
       _currentIcon = Icons.cloud_off_outlined;
+      _color = CupertinoColors.black;
     }
 
     return Align(
@@ -217,7 +227,11 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
         decoration: BoxDecoration(
             color: CupertinoColors.white,
             borderRadius: BorderRadius.all(Radius.circular(20))),
-        child: Icon(_currentIcon, size: 20),
+        child: Icon(
+          _currentIcon,
+          size: 20,
+          color: _color,
+        ),
       ),
     );
   }
