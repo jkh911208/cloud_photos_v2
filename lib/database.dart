@@ -97,6 +97,17 @@ class MediaTable {
         'UPDATE media SET cloudId = ? WHERE md5 = ?', [cloudId, md5]);
   }
 
+  Future<List<Map<String, dynamic>>> selectBycreateDateTime(
+      int createTime) async {
+    if (db == null) {
+      db = await getDatabaseObject();
+    }
+
+    final List<Map<String, dynamic>> results = await db
+        .query(table, where: "createDateTime = ?", whereArgs: [createTime]);
+    return results;
+  }
+
   Future update(Map<String, dynamic> data, String whereArg) async {
     if (db == null) {
       db = await getDatabaseObject();

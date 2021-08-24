@@ -24,14 +24,31 @@ Future<void> getFromCloud() async {
       Map<String, dynamic> current = response["json"]["result"][i];
       print(current);
       if ((await mediaTable.selectByMD5(current["md5"])).length == 0) {
-        mediaTable.insert({
-          "md5": current["md5"],
-          "duration": current["duration"].toInt(),
-          "createDateTime": current["original_datetime"],
-          "modifiedDateTime": null,
-          "cloudId": current["id"],
-          "localId": null
+        final List<Map<String, dynamic>> matchingCreateDateTime =
+            await mediaTable.selectBycreateDateTime(
+                (current["original_datetime"] ~/ 1000) * 1000);
+        bool locallyExist = false;
+        matchingCreateDateTime.forEach((element) async {
+          final List<int> bytes = utf8.encode(
+              "CloudPhotos,id:${element["localId"]},epoch:${element["creationTime"]}");
+          final String simpleMD5 = md5.convert(bytes).toString();
+          if (simpleMD5 == element["md5"]) {
+            await mediaTable.updateCloudId(element["md5"], current["id"]);
+            locallyExist = true;
+          }
         });
+        if (locallyExist == false) {
+          mediaTable.insert({
+            "md5": current["md5"],
+            "duration": current["duration"].toInt(),
+            "createDateTime": current["original_datetime"],
+            "modifiedDateTime": null,
+            "cloudId": current["id"],
+            "localId": null
+          });
+        }
+      } else {
+        await mediaTable.updateCloudId(current["md5"], current["id"]);
       }
       await writeCloudCreatedEpoch(current["created"]);
     }
@@ -62,8 +79,7 @@ Future<void> updateEntireLibrary() async {
       await album.getAssetListRange(start: 0, end: album.assetCount);
 
   assetList.forEach((asset) {
-    final String epoch =
-        asset.modifiedDateTime.millisecondsSinceEpoch.toString();
+    final String epoch = asset.createDateTime.millisecondsSinceEpoch.toString();
     final String id = asset.id;
     final List<int> bytes = utf8.encode("CloudPhotos,id:$id,epoch:$epoch");
     final String simpleMD5 = md5.convert(bytes).toString();
@@ -110,7 +126,6 @@ Future<int> uploadPendingAssets() async {
               await Api().multipart("/api/v1/photo/", data, file);
           if (response["statusCode"] == 201) {
             // update cloud id
-            print(response);
 
             await mediaTable.updateCloudId(
                 pending["md5"], response["json"]["id"]);

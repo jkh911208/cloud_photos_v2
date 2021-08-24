@@ -338,11 +338,6 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
       setState(() {
         photos = assetListAfterDownload;
       });
-      assetListAfterDownload.forEach((element) {
-        if (element["localId"] == null) {
-          print(element);
-        }
-      });
     }
 
     // upload new data to cloud
