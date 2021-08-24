@@ -6,6 +6,7 @@ import 'package:cloud_photos_v2/api.dart';
 import 'package:crypto/crypto.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:cloud_photos_v2/database.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 Future<void> getFromCloud() async {
   final MediaTable mediaTable = new MediaTable();
@@ -96,6 +97,14 @@ Future<void> updateEntireLibrary() async {
 }
 
 Future<int> uploadPendingAssets() async {
+  var connectivityResult = await Connectivity().checkConnectivity();
+  if (connectivityResult != ConnectivityResult.wifi) {
+    bool wifiOnly = await getWifiOnly();
+    if (wifiOnly == true) {
+      return 0;
+    }
+  }
+
   final MediaTable mediaTable = new MediaTable();
   List<Map<String, dynamic>> pendingAssets =
       await mediaTable.getPendingAssets();

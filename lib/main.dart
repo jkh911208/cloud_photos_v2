@@ -15,15 +15,8 @@ void main() async {
 
   runApp(
     MaterialApp(
-      home: CloudPhotos(),
-      debugShowCheckedModeBanner: false,
+      home: LoadingScreen(),
+      debugShowCheckedModeBanner: true,
     ),
   );
-}
-
-class CloudPhotos extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-      return LoadingScreen();
-  }
 }
