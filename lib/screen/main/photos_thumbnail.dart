@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_photos_v2/api.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 import 'package:package_info/package_info.dart';
+import 'package:flutter_fgbg/flutter_fgbg.dart';
 
 class ThumbnailScreen extends StatefulWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -33,11 +35,28 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   String baseUrl = dotenv.get('API_URL', fallback: 'http://localhost');
   String secret = dotenv.get('SECRET', fallback: 'yoursecret');
   String token = "";
+  late StreamSubscription<FGBGType> subscription;
 
-  _ThumbnailScreenState() {
+  @override
+  void initState() {
+    super.initState();
     getAllMedia();
     updateData();
+    subscription = FGBGEvents.stream.listen((event) {
+      if (event == FGBGType.foreground) {
+        print("back to foreground");
+        getAllMedia();
+        updateData();
+      }
+    });
   }
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
