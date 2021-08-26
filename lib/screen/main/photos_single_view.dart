@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:cloud_photos_v2/api.dart';
+import 'package:cloud_photos_v2/database.dart';
+import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/main/single_photo.dart';
 import 'package:cloud_photos_v2/screen/main/single_video.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,9 +16,11 @@ class SingleViewScreen extends StatefulWidget {
   final String baseUrl;
   final String secret;
   final String token;
+  final Function updatePhotosState;
 
   SingleViewScreen(
       {Key? key,
+      required this.updatePhotosState,
       required this.index,
       required this.photos,
       required this.secret,
@@ -27,13 +32,21 @@ class SingleViewScreen extends StatefulWidget {
 
   @override
   _SingleViewScreenState createState() =>
-      _SingleViewScreenState(currentPosition: index);
+      _SingleViewScreenState(currentPosition: index, photos: photos);
 }
 
 class _SingleViewScreenState extends State<SingleViewScreen> {
   int currentPosition;
+  List<Map<String, dynamic>> photos;
 
-  _SingleViewScreenState({required this.currentPosition});
+  _SingleViewScreenState({required this.photos, required this.currentPosition});
+
+  @override
+  void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print("parent updated");
+    print(oldWidget);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +79,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
               },
               controller: widget.pageController,
               allowImplicitScrolling: true, // allows caching next page
-              itemCount: widget.photos.length,
+              itemCount: photos.length,
               itemBuilder: (_, position) {
                 return FutureBuilder(
                     future: buildSingleView(position),
@@ -79,7 +92,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                       );
                     });
               }),
-          customFooter(context)
+          buildFooter(context)
         ],
       ),
     );
@@ -87,18 +100,18 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
 
   Widget assetDetails() {
     IconData _currentIcon = Icons.cloud_done_outlined;
-    if (widget.photos[currentPosition]["localId"] == null) {
+    if (photos[currentPosition]["localId"] == null) {
       _currentIcon = Icons.cloud_download_outlined;
-    } else if (widget.photos[currentPosition]["localId"] != null &&
-        widget.photos[currentPosition]["cloudId"] == null) {
-      if (widget.photos[currentPosition]["createDateTime"] >
+    } else if (photos[currentPosition]["localId"] != null &&
+        photos[currentPosition]["cloudId"] == null) {
+      if (photos[currentPosition]["createDateTime"] >
           DateTime.now().subtract(Duration(days: 7)).millisecondsSinceEpoch) {
         _currentIcon = Icons.cloud_upload_outlined;
       } else {
         _currentIcon = Icons.cloud_off_outlined;
       }
     }
-    if (widget.photos[currentPosition]["duration"] > 0) {
+    if (photos[currentPosition]["duration"] > 0) {
       _currentIcon = Icons.cloud_off_outlined;
     }
 
@@ -114,7 +127,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                 padding: const EdgeInsets.only(right: 8),
                 child: Text(
                   DateTime.fromMillisecondsSinceEpoch(
-                          widget.photos[currentPosition]["createDateTime"])
+                          photos[currentPosition]["createDateTime"])
                       .toString()
                       .substring(0, 16),
                   style: TextStyle(color: CupertinoColors.white),
@@ -133,13 +146,13 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
   }
 
   Future<Widget> buildSingleView(int position) async {
-    if (widget.photos[position]["localId"] != null) {
+    if (photos[position]["localId"] != null) {
       AssetEntity? asset =
-          await AssetEntity.fromId(widget.photos[position]["localId"]);
+          await AssetEntity.fromId(photos[position]["localId"]);
       if (asset != null) {
         File? file = await asset.file;
         if (file != null) {
-          if (widget.photos[position]["duration"] == 0) {
+          if (photos[position]["duration"] == 0) {
             return SinglePhoto(file: file);
           } else {
             return SingleVideo(
@@ -147,8 +160,11 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
           }
         }
       }
+      return Center(
+        child: CupertinoActivityIndicator(),
+      );
     }
-    String cloudId = widget.photos[position]["cloudId"];
+    String cloudId = photos[position]["cloudId"];
     return Image.network(
       "${widget.baseUrl}/api/v1/photo/$cloudId-resize.jpeg",
       headers: {
@@ -164,7 +180,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
     );
   }
 
-  Widget customFooter(BuildContext context) {
+  Widget buildFooter(BuildContext context) {
     return Align(
       child: Container(
           child: Row(
@@ -187,8 +203,36 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                 ),
               ),
               CupertinoButton(
-                onPressed: () {
-                  print(widget.pageController.page);
+                onPressed: () async {
+                  // alert user deleting file
+                  bool delete = true;
+                  if (photos[currentPosition]["localId"] == null) {
+                    delete = await _confirmDeleteDialog();
+                  }
+                  if (delete) {
+                    print(delete);
+                    // remove from local db and local storage
+                    bool locallyDeleted =
+                        await deleteSigleAsset(photos[currentPosition]);
+                    if (locallyDeleted == false) {
+                      return;
+                    }
+
+                    // remove from cloud if cloudId exist
+                    if (photos[currentPosition]["cloudId"] != null) {
+                      await Api().delete(
+                          "/api/v1/photo/${photos[currentPosition]["cloudId"]}");
+                    }
+
+                    // update state
+                    widget.updatePhotosState();
+                    var newAsset = await MediaTable().selectAll();
+                    setState(() {
+                      photos = newAsset;
+                    });
+                  } else {
+                    return;
+                  }
                 },
                 child: Icon(
                   CupertinoIcons.trash,
@@ -213,5 +257,49 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
           width: double.infinity),
       alignment: Alignment(0, 1),
     );
+  }
+
+  Future<bool> _confirmDeleteDialog() async {
+    bool decision = false;
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text(
+              'Deleting Photo',
+              style: TextStyle(color: CupertinoColors.destructiveRed),
+            ),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: const <Widget>[
+                  Text('Photo will be deleted from both device and cloud'),
+                  Text('Do you still want to delete it?'),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  decision = false;
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: CupertinoColors.destructiveRed),
+                ),
+                onPressed: () {
+                  decision = true;
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
+
+    return decision;
   }
 }

@@ -28,10 +28,22 @@ class Api {
 
     // frontend verification token
     header["X-Custom-Auth"] = issueJwtHS256(
-        JwtClaim(otherClaims: {
-          "timestamp": DateTime.now().millisecondsSinceEpoch
-        }),
+        JwtClaim(
+            otherClaims: {"timestamp": DateTime.now().millisecondsSinceEpoch}),
         secret);
+  }
+
+  Future<Map<String, dynamic>> delete(String path) async {
+    await setupAuthHeader();
+    var url = Uri.parse(baseUrl + path);
+    var response = await client.delete(url, headers: header);
+    Map<String, dynamic> result = {"statusCode": response.statusCode};
+    try {
+      result["json"] = jsonDecode(response.body);
+    } on Exception {
+      result["body"] = response.body;
+    }
+    return result;
   }
 
   Future<Map<String, dynamic>> get(String path) async {

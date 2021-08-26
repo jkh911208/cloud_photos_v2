@@ -8,9 +8,23 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:cloud_photos_v2/database.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-Future<void> getFromCloud() async {
-  final MediaTable mediaTable = new MediaTable();
+final MediaTable mediaTable = new MediaTable();
 
+Future<bool> deleteSigleAsset(Map<String, dynamic> data) async {
+  // delete from device
+  if (data["localId"] != null) {
+    var result = await PhotoManager.editor.deleteWithIds([data["localId"]]);
+    if (result.length == 0) {
+      return false;
+    }
+  }
+
+  // delete from db
+  await mediaTable.deleteByMD5(data["md5"]);
+  return true;
+}
+
+Future<void> getFromCloud() async {
   // get biggest modified
   int biggestCloudCreated = await getCloudCreatedEpoch();
   print("cloud biggest created $biggestCloudCreated");
@@ -57,7 +71,6 @@ Future<void> getFromCloud() async {
 }
 
 Future<void> updateEntireLibrary() async {
-  final MediaTable mediaTable = new MediaTable();
   final int biggestmodified =
       await mediaTable.selectBiggstModifiedDateTimeLocal();
   print("current biggest modified $biggestmodified");
@@ -105,14 +118,15 @@ Future<int> uploadPendingAssets() async {
     }
   }
 
-  final MediaTable mediaTable = new MediaTable();
   List<Map<String, dynamic>> pendingAssets =
       await mediaTable.getPendingAssets();
   // print(pendingAssets);
 
   // start upload file using api
   int uploadNumber = 0;
-  pendingAssets.forEach((pending) async {
+  // pendingAssets.forEach((pending) async
+  for (var i = 0; i < pendingAssets.length; i++) {
+    Map<String, dynamic> pending = pendingAssets[i];
     AssetEntity? asset = await AssetEntity.fromId(pending["localId"]);
     if (asset != null) {
       File? file = await asset.file;
@@ -145,6 +159,6 @@ Future<int> uploadPendingAssets() async {
         }
       }
     }
-  });
+  }
   return uploadNumber;
 }

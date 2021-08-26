@@ -81,11 +81,11 @@ class MediaTable {
     return {};
   }
 
-  Future<void> deleteByMD5(Map<String, dynamic> data) async {
+  Future<void> deleteByMD5(String md5) async {
     if (db == null) {
       db = await getDatabaseObject();
     }
-    await db.delete(table, where: 'md5 = ?', whereArgs: [data["md5"]]);
+    await db.delete(table, where: 'md5 = ?', whereArgs: [md5]);
   }
 
   Future updateCloudId(String md5, String cloudId) async {

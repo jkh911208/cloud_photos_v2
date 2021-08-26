@@ -201,12 +201,12 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                     Navigator.of(context)
                         .push(MaterialPageRoute(builder: (context) {
                       return SingleViewScreen(
-                        index: index,
-                        photos: photos,
-                        baseUrl: baseUrl,
-                        secret: secret,
-                        token: token,
-                      );
+                          index: index,
+                          photos: photos,
+                          baseUrl: baseUrl,
+                          secret: secret,
+                          token: token,
+                          updatePhotosState: updatePhotosState);
                     }));
                   },
                   child: Stack(
@@ -359,25 +359,25 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     }
   }
 
-  Future<void> getAllMedia() async {
-    await updateEntireLibrary();
+  Future<void> updatePhotosState() async {
     List<Map<String, dynamic>> assetList = await mediaTable.selectAll();
     setState(() {
       photos = assetList;
     });
+  }
+
+  Future<void> getAllMedia() async {
+    await updateEntireLibrary();
+    await updatePhotosState();
 
     // get new data from cloud
     await getFromCloud();
-    assetList = await mediaTable.selectAll();
-    setState(() {
-      photos = assetList;
-    });
+    await updatePhotosState();
 
     // upload new data to cloud
-    await uploadPendingAssets();
-    assetList = await mediaTable.selectAll();
-    setState(() {
-      photos = assetList;
-    });
+    int numUpload = await uploadPendingAssets();
+    if (numUpload > 0) {
+      await updatePhotosState();
+    }
   }
 }
