@@ -42,13 +42,6 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
   _SingleViewScreenState({required this.photos, required this.currentPosition});
 
   @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    print("parent updated");
-    print(oldWidget);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: CupertinoColors.black,
