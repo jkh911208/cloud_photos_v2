@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:cloud_photos_v2/api.dart';
 import 'package:cloud_photos_v2/database.dart';
 import 'package:cloud_photos_v2/library_management.dart';
-import 'package:cloud_photos_v2/screen/main/single_photo.dart';
 import 'package:cloud_photos_v2/screen/main/single_video.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -146,7 +145,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
         File? file = await asset.file;
         if (file != null) {
           if (photos[position]["duration"] == 0) {
-            return SinglePhoto(file: file);
+            return Image.file(file);
           } else {
             return SingleVideo(
                 file: file, pageController: widget.pageController);
