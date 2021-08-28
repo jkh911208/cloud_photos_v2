@@ -160,7 +160,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
     String cloudId = photos[position]["cloudId"];
     return CachedNetworkImage(
       imageUrl: "${widget.baseUrl}/api/v1/photo/$cloudId-resize.jpeg",
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       cacheKey: "$cloudId-resize",
       placeholder: (context, url) =>
           Center(child: CupertinoActivityIndicator()),
