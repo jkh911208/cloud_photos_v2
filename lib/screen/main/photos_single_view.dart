@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_photos_v2/api.dart';
 import 'package:cloud_photos_v2/database.dart';
 import 'package:cloud_photos_v2/library_management.dart';
@@ -62,7 +63,6 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
       bottom: false,
       child: Stack(
         children: [
-          assetDetails(),
           PageView.builder(
               onPageChanged: (int newPosition) {
                 setState(() {
@@ -84,6 +84,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                       );
                     });
               }),
+          assetDetails(),
           buildFooter(context)
         ],
       ),
@@ -157,9 +158,13 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
       );
     }
     String cloudId = photos[position]["cloudId"];
-    return Image.network(
-      "${widget.baseUrl}/api/v1/photo/$cloudId-resize.jpeg",
-      headers: {
+    return CachedNetworkImage(
+      imageUrl: "${widget.baseUrl}/api/v1/photo/$cloudId-resize.jpeg",
+      fit: BoxFit.cover,
+      cacheKey: "$cloudId-resize",
+      placeholder: (context, url) =>
+          Center(child: CupertinoActivityIndicator()),
+      httpHeaders: {
         "Authorization": "Bearer ${widget.token}",
         "X-Custom-Auth": issueJwtHS256(
             JwtClaim(otherClaims: {
@@ -167,8 +172,6 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
             }),
             widget.secret)
       },
-      fit: BoxFit.contain,
-      gaplessPlayback: true,
     );
   }
 

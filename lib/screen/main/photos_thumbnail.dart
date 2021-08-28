@@ -16,6 +16,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 import 'package:package_info/package_info.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ThumbnailScreen extends StatefulWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -290,9 +291,13 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
 
   Future<Widget> cloudThumbnailBuilder(int index) async {
     String cloudId = photos[index]["cloudId"];
-    return Image.network(
-      "$baseUrl/api/v1/photo/$cloudId-thumbnail.jpeg",
-      headers: {
+    return CachedNetworkImage(
+      imageUrl: "$baseUrl/api/v1/photo/$cloudId-thumbnail.jpeg",
+      fit: BoxFit.cover,
+      cacheKey: "$cloudId-thumbnail",
+      placeholder: (context, url) =>
+          Center(child: CupertinoActivityIndicator()),
+      httpHeaders: {
         "Authorization": "Bearer $token",
         "X-Custom-Auth": issueJwtHS256(
             JwtClaim(otherClaims: {
@@ -300,8 +305,6 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
             }),
             secret)
       },
-      fit: BoxFit.cover,
-      gaplessPlayback: true,
     );
   }
 
