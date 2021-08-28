@@ -37,6 +37,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   String secret = dotenv.get('SECRET', fallback: 'yoursecret');
   String token = "";
   late StreamSubscription<FGBGType> subscription;
+  Set<int> selected = Set();
 
   @override
   void initState() {
@@ -79,7 +80,27 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   CupertinoNavigationBar buildAppBar() {
     return CupertinoNavigationBar(
       backgroundColor: CupertinoColors.black,
-      leading: Container(),
+      leading: selected.length > 0
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selected = Set();
+                    });
+                  },
+                  child: Icon(CupertinoIcons.xmark,
+                      color: CupertinoColors.white, size: 25),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Icon(CupertinoIcons.delete,
+                      color: CupertinoColors.white, size: 25),
+                )
+              ],
+            )
+          : Container(),
       trailing: GestureDetector(
           onTap: () {
             setState(() {
@@ -198,28 +219,73 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
             itemCount: photos.length,
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
+                  onLongPress: () {
+                    if (selected.length == 0) {
+                      selected.add(index);
+                      setState(() {
+                        selected = selected;
+                      });
+                    }
+                    print(selected);
+                  },
                   onTap: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (context) {
-                      return SingleViewScreen(
-                          index: index,
-                          photos: photos,
-                          baseUrl: baseUrl,
-                          secret: secret,
-                          token: token,
-                          updatePhotosState: updatePhotosState);
-                    }));
+                    if (selected.length > 0) {
+                      if (selected.contains(index)) {
+                        selected.remove(index);
+                        setState(() {
+                          selected = selected;
+                        });
+                      } else {
+                        selected.add(index);
+                        setState(() {
+                          selected = selected;
+                        });
+                      }
+                    } else {
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (context) {
+                        return SingleViewScreen(
+                            index: index,
+                            photos: photos,
+                            baseUrl: baseUrl,
+                            secret: secret,
+                            token: token,
+                            updatePhotosState: updatePhotosState);
+                      }));
+                    }
                   },
                   child: Stack(
                     children: [
                       Positioned.fill(child: thumbnailBuilder(index)),
                       isVideo(index),
-                      uploadStatus(index)
+                      uploadStatus(index),
+                      isSelected(index)
                     ],
                   ));
             }),
       ),
     );
+  }
+
+  Widget isSelected(int index) {
+    if (selected.contains(index)) {
+      return Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Container(
+            decoration: BoxDecoration(
+                color: CupertinoColors.white,
+                borderRadius: BorderRadius.all(Radius.circular(20))),
+            child: Icon(
+              CupertinoIcons.check_mark,
+              size: 20,
+            ),
+          ),
+        ),
+      );
+    }
+    return Container();
   }
 
   Widget uploadStatus(int index) {
@@ -249,16 +315,19 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
       _color = CupertinoColors.black;
     }
 
-    return Align(
-      alignment: Alignment.topRight,
-      child: Container(
-        decoration: BoxDecoration(
-            color: CupertinoColors.white,
-            borderRadius: BorderRadius.all(Radius.circular(20))),
-        child: Icon(
-          _currentIcon,
-          size: 20,
-          color: _color,
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Container(
+          decoration: BoxDecoration(
+              color: CupertinoColors.white,
+              borderRadius: BorderRadius.all(Radius.circular(20))),
+          child: Icon(
+            _currentIcon,
+            size: 20,
+            color: _color,
+          ),
         ),
       ),
     );
@@ -291,34 +360,49 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
 
   Future<Widget> cloudThumbnailBuilder(int index) async {
     String cloudId = photos[index]["cloudId"];
-    return CachedNetworkImage(
-      imageUrl: "$baseUrl/api/v1/photo/$cloudId-thumbnail.jpeg",
-      fit: BoxFit.cover,
-      cacheKey: "$cloudId-thumbnail",
-      placeholder: (context, url) =>
-          Center(child: CupertinoActivityIndicator()),
-      httpHeaders: {
-        "Authorization": "Bearer $token",
-        "X-Custom-Auth": issueJwtHS256(
-            JwtClaim(otherClaims: {
-              "timestamp": DateTime.now().millisecondsSinceEpoch
-            }),
-            secret)
-      },
+    bool _selected = selected.contains(index) ? true : false;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: _selected ? 3 : 0,
+        ),
+      ),
+      child: CachedNetworkImage(
+        imageUrl: "$baseUrl/api/v1/photo/$cloudId-thumbnail.jpeg",
+        fit: BoxFit.cover,
+        cacheKey: "$cloudId-thumbnail",
+        placeholder: (context, url) =>
+            Center(child: CupertinoActivityIndicator()),
+        httpHeaders: {
+          "Authorization": "Bearer $token",
+          "X-Custom-Auth": issueJwtHS256(
+              JwtClaim(otherClaims: {
+                "timestamp": DateTime.now().millisecondsSinceEpoch
+              }),
+              secret)
+        },
+      ),
     );
   }
 
   Future<Widget> localThumbnailBuilder(int index) async {
     String id = photos[index]["localId"];
-    // print(photos[index]);
     AssetEntity? asset = await AssetEntity.fromId(id);
+    bool _selected = selected.contains(index) ? true : false;
     if (asset != null) {
       Uint8List? thumbnail = await asset.thumbData;
       if (thumbnail != null) {
-        return Image.memory(
-          thumbnail,
-          fit: BoxFit.cover,
-          gaplessPlayback: true,
+        return Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              width: _selected ? 3 : 0,
+            ),
+          ),
+          child: Image.memory(
+            thumbnail,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+          ),
         );
       }
     }
