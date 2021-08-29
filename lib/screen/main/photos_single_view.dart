@@ -268,8 +268,8 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                   String height = data["Image ImageLength"].toString();
                   String make = data["Image Make"].toString();
                   String model = data["Image Model"].toString();
-                  int size = await _file!.length();
-                  String MBSize = (size / 1024 / 1024).toStringAsFixed(2);
+                  int fileLength = await _file!.length();
+                  String size = (fileLength / 1024 / 1024).toStringAsFixed(2);
                   String datetime = data["Image DateTime"].toString();
 
                   showModalBottomSheet(
@@ -317,7 +317,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                                     color: Constant.CloudPhotosGrey,
                                   ),
                                   title: Text(
-                                    "$width x $height $MBSize MB",
+                                    "$width x $height $size MB",
                                     style: TextStyle(
                                         color: Constant.CloudPhotosGrey),
                                   ),

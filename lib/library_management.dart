@@ -10,6 +10,28 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 final MediaTable mediaTable = new MediaTable();
 
+Future<int> deleteMultipleAssets(List<Map<String, dynamic>> data) async {
+  List<String> ids = [];
+  for (var i = 0; i < data.length; i++) {
+    if (data[i]["localId"] != null) {
+      ids.add(data[i]["localId"]);
+    }
+  }
+  // Delete from device
+  List result = [];
+  if (ids.length > 0) {
+    result = await PhotoManager.editor.deleteWithIds(ids);
+  }
+
+  // delete the db if deleted from device
+  if (ids.length == result.length) {
+    for (var i = 0; i < data.length; i++) {
+      await mediaTable.deleteByMD5(data[i]["md5"]);
+    }
+  }
+  return result.length;
+}
+
 Future<bool> deleteSigleAsset(Map<String, dynamic> data) async {
   // delete from device
   if (data["localId"] != null) {

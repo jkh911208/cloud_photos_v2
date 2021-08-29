@@ -7,6 +7,7 @@ import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/loading.dart';
 import 'package:cloud_photos_v2/screen/main/photos_single_view.dart';
 import 'package:cloud_photos_v2/storage.dart';
+import 'package:cloud_photos_v2/util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,23 +63,27 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        key: scaffoldKey,
-        appBar: buildAppBar(),
-        backgroundColor: CupertinoColors.black,
-        body: thumbnailBody(),
-        endDrawer: FutureBuilder(
-          future: buildEndDrawer(),
-          builder: (context, AsyncSnapshot snapshot) {
-            if (snapshot.hasData) {
-              return snapshot.data;
-            }
-            return Container();
-          },
-        ));
+    return FutureBuilder(
+      future: _futureBuilder(context),
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          return snapshot.data;
+        }
+        return Container();
+      },
+    );
   }
 
-  CupertinoNavigationBar buildAppBar() {
+  Future<Widget> _futureBuilder(BuildContext context) async {
+    return Scaffold(
+        key: scaffoldKey,
+        appBar: await buildAppBar(context),
+        backgroundColor: CupertinoColors.black,
+        body: thumbnailBody(),
+        endDrawer: await buildEndDrawer());
+  }
+
+  Future<CupertinoNavigationBar> buildAppBar(BuildContext context) async {
     if (selected.length > 0) {
       return CupertinoNavigationBar(
         backgroundColor: CupertinoColors.black,
@@ -86,34 +91,75 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.only(right: 6),
+              padding: const EdgeInsets.only(right: 8),
               child: Icon(CupertinoIcons.share,
                   color: CupertinoColors.white, size: 25),
             ),
-            Icon(CupertinoIcons.delete, color: CupertinoColors.white, size: 25),
-          ],
-        ),
-        leading: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: () {
+            GestureDetector(
+                onTap: () async {
+                  print("delete all slected");
+                  print(selected);
+                  bool decision = await customDialog(
+                      context,
+                      "Delete ${selected.length} selected photos",
+                      "Photos will be removed from both device and Cloud",
+                      "Do you still want to remove all ${selected.length} photos?",
+                      "Delete");
+                  if (decision) {
+                    // build list
+                    List<Map<String, dynamic>> data = [];
+                    for (var i = 0; i < selected.length; i++) {
+                      int index = selected.elementAt(i);
+                      data.add(photos[index]);
+                    }
+                    print(data);
+                    //delete from device
+                    int locallyDeleted = await deleteMultipleAssets(data);
+
+                    // delete from cloud
+                    int cloudDeleted = 0;
+                    for (var i = 0; i < data.length; i++) {
+                      if (data[i]["cloudId"] != null) {
+                        Map<String, dynamic> result = await Api()
+                            .delete("/api/v1/photo/${data[i]["cloudId"]}");
+                        if (result["statudCode"] == 200) {
+                          cloudDeleted++;
+                        }
+                      }
+                    }
+
+                    print(locallyDeleted);
+                    print(cloudDeleted);
                     setState(() {
                       selected = Set();
                     });
-                  },
-                  child: Icon(CupertinoIcons.xmark,
-                      color: CupertinoColors.white, size: 25),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(
+                    await updatePhotosState();
+                  }
+                },
+                child: Icon(CupertinoIcons.delete,
+                    color: CupertinoColors.white, size: 25)),
+          ],
+        ),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  selected = Set();
+                });
+              },
+              child: Icon(CupertinoIcons.xmark,
+                  color: CupertinoColors.white, size: 25),
+            ),
+            Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(
                   "${selected.length}",
                   style: TextStyle(color: CupertinoColors.white, fontSize: 23),
-                )
-                )
-              ],
-            ),
+                ))
+          ],
+        ),
       );
     }
     return CupertinoNavigationBar(
