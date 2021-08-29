@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_photos_v2/api.dart';
+import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/database.dart';
 import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/main/single_video.dart';
@@ -10,6 +11,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:exif/exif.dart';
 
 class SingleViewScreen extends StatefulWidget {
   final int index;
@@ -246,7 +248,97 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                 ),
               ),
               CupertinoButton(
-                onPressed: () {},
+                onPressed: () async {
+                  File? _file;
+                  if (photos[currentPosition]["localId"] != null) {
+                    AssetEntity? asset = await AssetEntity.fromId(
+                        photos[currentPosition]["localId"]);
+                    if (asset != null) {
+                      _file = await asset.file;
+                    }
+                  } else {
+                    var tempFile = await DefaultCacheManager().getFileFromCache(
+                        "${photos[currentPosition]["cloudId"]}-resize");
+                    if (tempFile != null) {
+                      _file = tempFile.file;
+                    }
+                  }
+                  final data = await readExifFromFile(_file);
+                  String width = data["Image ImageWidth"].toString();
+                  String height = data["Image ImageLength"].toString();
+                  String make = data["Image Make"].toString();
+                  String model = data["Image Model"].toString();
+                  int size = await _file!.length();
+                  String MBSize = (size / 1024 / 1024).toStringAsFixed(2);
+                  String datetime = data["Image DateTime"].toString();
+
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: MediaQuery.of(context).size.height / 2,
+                          decoration:
+                              BoxDecoration(color: CupertinoColors.black),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Visibility(
+                                  visible: datetime != "null",
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: Text(
+                                      datetime,
+                                      style: TextStyle(
+                                          color: Constant.CloudPhotosGrey),
+                                    ),
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: datetime != "null",
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, bottom: 10),
+                                    child: Divider(
+                                      color: Constant.CloudPhotosGrey,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  "Details",
+                                  style: TextStyle(
+                                      color: Constant.CloudPhotosGrey),
+                                ),
+                                ListTile(
+                                  leading: Icon(
+                                    CupertinoIcons.photo,
+                                    color: Constant.CloudPhotosGrey,
+                                  ),
+                                  title: Text(
+                                    "$width x $height $MBSize MB",
+                                    style: TextStyle(
+                                        color: Constant.CloudPhotosGrey),
+                                  ),
+                                ),
+                                ListTile(
+                                  leading: Icon(
+                                    CupertinoIcons.camera,
+                                    color: Constant.CloudPhotosGrey,
+                                  ),
+                                  title: Text(
+                                    "$make $model",
+                                    style: TextStyle(
+                                        color: Constant.CloudPhotosGrey),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      });
+                },
                 child: Icon(
                   CupertinoIcons.info_circle,
                   size: 30,
