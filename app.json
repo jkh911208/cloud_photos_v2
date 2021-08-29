@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Cloud Photos",
+    "slug": "cloud_photos",
+    "version": "1.3.2",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "enabled": false
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "net.cloudphotos.www",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSPhotoLibraryAddUsageDescription": "Give Cloud Photos permission to delete photos",
+        "NSPhotoLibraryUsageDescription": "Give Cloud Photos permission to access your photos to view, manage and backup to Cloud"
+      }
+    },
+    "android": {
+      "versionCode": 13,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "net.cloudphotos.www"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
