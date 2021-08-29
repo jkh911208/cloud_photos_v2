@@ -59,6 +59,8 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
   }
 
   Future<Widget> buildPageView(BuildContext context) async {
+    TransformationController _transformationController =
+        TransformationController();
     return SafeArea(
       bottom: false,
       child: Stack(
@@ -77,7 +79,40 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                     future: buildSingleView(position),
                     builder: (_, AsyncSnapshot snapshot) {
                       if (snapshot.hasData) {
-                        return snapshot.data;
+                        return InteractiveViewer(
+                          transformationController: _transformationController,
+                          child: GestureDetector(
+                            onDoubleTap: () {
+                              if (_transformationController.value !=
+                                  Matrix4.identity()) {
+                                _transformationController.value =
+                                    Matrix4.identity();
+                              } else {
+                                _transformationController.value = Matrix4(
+                                  2.5,
+                                  0,
+                                  0,
+                                  0,
+                                  0,
+                                  2.5,
+                                  0,
+                                  0,
+                                  0,
+                                  0,
+                                  2.5,
+                                  0,
+                                  -250,
+                                  -500,
+                                  0,
+                                  1,
+                                );
+                              }
+                            },
+                            child: snapshot.data,
+                          ),
+                          maxScale: 5,
+                          minScale: 1,
+                        );
                       }
                       return Center(
                         child: CupertinoActivityIndicator(),

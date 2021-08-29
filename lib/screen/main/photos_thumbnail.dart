@@ -9,6 +9,7 @@ import 'package:cloud_photos_v2/screen/main/photos_single_view.dart';
 import 'package:cloud_photos_v2/storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -78,10 +79,16 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   }
 
   CupertinoNavigationBar buildAppBar() {
-    return CupertinoNavigationBar(
-      backgroundColor: CupertinoColors.black,
-      leading: selected.length > 0
-          ? Row(
+    if (selected.length > 0) {
+      return CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.black,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.delete, color: CupertinoColors.white, size: 25),
+          ],
+        ),
+        leading: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 GestureDetector(
@@ -95,12 +102,18 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
-                  child: Icon(CupertinoIcons.delete,
-                      color: CupertinoColors.white, size: 25),
+                  child: Text(
+                  "${selected.length}",
+                  style: TextStyle(color: CupertinoColors.white, fontSize: 23),
+                )
                 )
               ],
-            )
-          : Container(),
+            ),
+      );
+    }
+    return CupertinoNavigationBar(
+      backgroundColor: CupertinoColors.black,
+      leading: Container(),
       trailing: GestureDetector(
           onTap: () {
             setState(() {
@@ -206,7 +219,11 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                   photos[currentLine * 4]["createDateTime"])
               .toString()
               .split("-");
-          return Text(date[1] + "/" + date[0]);
+          try {
+            return Text(date[1] + "/" + date[0]);
+          } on Exception {
+            return Text("N/A");
+          }
         },
         scrollbarTimeToFade: Duration(seconds: 5),
         controller: scrollController,
@@ -225,6 +242,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                       setState(() {
                         selected = selected;
                       });
+                      HapticFeedback.heavyImpact();
                     }
                     print(selected);
                   },
@@ -241,6 +259,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                           selected = selected;
                         });
                       }
+                      HapticFeedback.heavyImpact();
                     } else {
                       Navigator.of(context)
                           .push(MaterialPageRoute(builder: (context) {
@@ -256,7 +275,14 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                   },
                   child: Stack(
                     children: [
-                      Positioned.fill(child: thumbnailBuilder(index)),
+                      Positioned.fill(
+                          child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    width: selected.contains(index) ? 10 : 0,
+                                    color: CupertinoColors.white),
+                              ),
+                              child: thumbnailBuilder(index))),
                       isVideo(index),
                       uploadStatus(index),
                       isSelected(index)
@@ -360,49 +386,33 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
 
   Future<Widget> cloudThumbnailBuilder(int index) async {
     String cloudId = photos[index]["cloudId"];
-    bool _selected = selected.contains(index) ? true : false;
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: _selected ? 3 : 0,
-        ),
-      ),
-      child: CachedNetworkImage(
-        imageUrl: "$baseUrl/api/v1/photo/$cloudId-thumbnail.jpeg",
-        fit: BoxFit.cover,
-        cacheKey: "$cloudId-thumbnail",
-        placeholder: (context, url) =>
-            Center(child: CupertinoActivityIndicator()),
-        httpHeaders: {
-          "Authorization": "Bearer $token",
-          "X-Custom-Auth": issueJwtHS256(
-              JwtClaim(otherClaims: {
-                "timestamp": DateTime.now().millisecondsSinceEpoch
-              }),
-              secret)
-        },
-      ),
+    return CachedNetworkImage(
+      imageUrl: "$baseUrl/api/v1/photo/$cloudId-thumbnail.jpeg",
+      fit: BoxFit.cover,
+      cacheKey: "$cloudId-thumbnail",
+      placeholder: (context, url) =>
+          Center(child: CupertinoActivityIndicator()),
+      httpHeaders: {
+        "Authorization": "Bearer $token",
+        "X-Custom-Auth": issueJwtHS256(
+            JwtClaim(otherClaims: {
+              "timestamp": DateTime.now().millisecondsSinceEpoch
+            }),
+            secret)
+      },
     );
   }
 
   Future<Widget> localThumbnailBuilder(int index) async {
     String id = photos[index]["localId"];
     AssetEntity? asset = await AssetEntity.fromId(id);
-    bool _selected = selected.contains(index) ? true : false;
     if (asset != null) {
       Uint8List? thumbnail = await asset.thumbData;
       if (thumbnail != null) {
-        return Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              width: _selected ? 3 : 0,
-            ),
-          ),
-          child: Image.memory(
-            thumbnail,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-          ),
+        return Image.memory(
+          thumbnail,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
         );
       }
     }
