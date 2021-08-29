@@ -85,6 +85,11 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: Icon(CupertinoIcons.share,
+                  color: CupertinoColors.white, size: 25),
+            ),
             Icon(CupertinoIcons.delete, color: CupertinoColors.white, size: 25),
           ],
         ),
@@ -101,7 +106,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                       color: CupertinoColors.white, size: 25),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 4),
+                  padding: const EdgeInsets.only(left: 6),
                   child: Text(
                   "${selected.length}",
                   style: TextStyle(color: CupertinoColors.white, fontSize: 23),
