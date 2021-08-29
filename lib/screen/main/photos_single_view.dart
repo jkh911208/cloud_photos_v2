@@ -8,6 +8,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class SingleViewScreen extends StatefulWidget {
   final int index;
@@ -120,7 +122,7 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
                     });
               }),
           assetDetails(),
-          buildFooter(context)
+          await buildFooter(context)
         ],
       ),
     );
@@ -210,14 +212,33 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
     );
   }
 
-  Widget buildFooter(BuildContext context) {
+  Future<Widget> buildFooter(BuildContext context) async {
     return Align(
       child: Container(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               CupertinoButton(
-                onPressed: () {},
+                onPressed: () async {
+                  if (photos[currentPosition]["localId"] != null) {
+                    // local image
+                    AssetEntity? asset = await AssetEntity.fromId(
+                        photos[currentPosition]["localId"]);
+                    if (asset != null) {
+                      File? _file = await asset.file;
+                      if (_file != null) {
+                        await Share.shareFiles([_file.path]);
+                      }
+                    }
+                  } else {
+                    // network image get from cache
+                    var file = await DefaultCacheManager().getFileFromCache(
+                        "${photos[currentPosition]["cloudId"]}-resize");
+                    if (file != null) {
+                      Share.shareFiles([file.file.path]);
+                    }
+                  }
+                },
                 child: Icon(
                   CupertinoIcons.share,
                   size: 30,
