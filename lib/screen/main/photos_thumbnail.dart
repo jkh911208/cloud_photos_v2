@@ -23,6 +23,7 @@ import 'package:flutter_fgbg/flutter_fgbg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class ThumbnailScreen extends StatefulWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -131,6 +132,25 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                       }
                     } else {
                       // if cloud get cache
+                      var file = await DefaultCacheManager()
+                          .getFileFromCache("${data[i]["cloudId"]}-resize");
+                      if (file != null) {
+                        paths.add(file.file.path);
+                      } else {
+                        var fileInfo = await DefaultCacheManager().downloadFile(
+                            "$baseUrl/api/v1/photo/${data[i]["cloudId"]}-resize.jpeg",
+                            key: "${data[i]["cloudId"]}-resize",
+                            authHeaders: {
+                              "Authorization": "Bearer $token",
+                              "X-Custom-Auth": issueJwtHS256(
+                                  JwtClaim(otherClaims: {
+                                    "timestamp":
+                                        DateTime.now().millisecondsSinceEpoch
+                                  }),
+                                  secret)
+                            });
+                        paths.add(fileInfo.file.path);
+                      }
                     }
                   }
                   print(paths);
