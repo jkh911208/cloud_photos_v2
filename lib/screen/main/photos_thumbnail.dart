@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_photos_v2/api.dart';
+import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/database.dart';
 import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/loading.dart';
@@ -40,6 +41,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   String token = "";
   late StreamSubscription<FGBGType> subscription;
   Set<int> selected = Set();
+  bool showScrollToTop = false;
 
   @override
   void initState() {
@@ -53,6 +55,16 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
         updateData();
       }
     });
+    scrollController
+      ..addListener(() {
+        setState(() {
+          if (scrollController.offset >= 200) {
+            showScrollToTop = true;
+          } else {
+            showScrollToTop = false;
+          }
+        });
+      });
   }
 
   @override
@@ -261,86 +273,115 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   }
 
   Widget thumbnailBody() {
-    return SafeArea(
-      bottom: false,
-      child: DraggableScrollbar.rrect(
-        labelTextBuilder: (double offset) {
-          int currentLine = offset ~/ 100;
-          List<String> date = DateTime.fromMillisecondsSinceEpoch(
-                  photos[currentLine * 4]["createDateTime"])
-              .toString()
-              .split("-");
-          try {
-            return Text(date[1] + "/" + date[0]);
-          } on Exception {
-            return Text("N/A");
-          }
-        },
-        scrollbarTimeToFade: Duration(seconds: 5),
-        controller: scrollController,
-        child: GridView.builder(
-            addAutomaticKeepAlives: true,
-            addRepaintBoundaries: true,
+    return Stack(
+      children: [
+        SafeArea(
+          bottom: false,
+          child: DraggableScrollbar.rrect(
+            labelTextBuilder: (double offset) {
+              int currentLine = offset ~/ 100;
+              List<String> date = DateTime.fromMillisecondsSinceEpoch(
+                      photos[currentLine * 4]["createDateTime"])
+                  .toString()
+                  .split("-");
+              try {
+                return Text(date[1] + "/" + date[0]);
+              } on Exception {
+                return Text("N/A");
+              }
+            },
+            scrollbarTimeToFade: Duration(seconds: 5),
             controller: scrollController,
-            gridDelegate:
-                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-            itemCount: photos.length,
-            itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                  onLongPress: () {
-                    if (selected.length == 0) {
-                      selected.add(index);
-                      setState(() {
-                        selected = selected;
-                      });
-                      HapticFeedback.heavyImpact();
-                    }
-                    print(selected);
-                  },
-                  onTap: () {
-                    if (selected.length > 0) {
-                      if (selected.contains(index)) {
-                        selected.remove(index);
-                        setState(() {
-                          selected = selected;
-                        });
-                      } else {
-                        selected.add(index);
-                        setState(() {
-                          selected = selected;
-                        });
-                      }
-                      HapticFeedback.heavyImpact();
-                    } else {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        return SingleViewScreen(
-                            index: index,
-                            photos: photos,
-                            baseUrl: baseUrl,
-                            secret: secret,
-                            token: token,
-                            updatePhotosState: updatePhotosState);
-                      }));
-                    }
-                  },
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                          child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    width: selected.contains(index) ? 10 : 0,
-                                    color: CupertinoColors.white),
-                              ),
-                              child: thumbnailBuilder(index))),
-                      isVideo(index),
-                      uploadStatus(index),
-                      isSelected(index)
-                    ],
-                  ));
-            }),
-      ),
+            child: GridView.builder(
+                addAutomaticKeepAlives: true,
+                addRepaintBoundaries: true,
+                controller: scrollController,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4),
+                itemCount: photos.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                      onLongPress: () {
+                        if (selected.length == 0) {
+                          selected.add(index);
+                          setState(() {
+                            selected = selected;
+                          });
+                          HapticFeedback.heavyImpact();
+                        }
+                        print(selected);
+                      },
+                      onTap: () {
+                        if (selected.length > 0) {
+                          if (selected.contains(index)) {
+                            selected.remove(index);
+                            setState(() {
+                              selected = selected;
+                            });
+                          } else {
+                            selected.add(index);
+                            setState(() {
+                              selected = selected;
+                            });
+                          }
+                          HapticFeedback.heavyImpact();
+                        } else {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            return SingleViewScreen(
+                                index: index,
+                                photos: photos,
+                                baseUrl: baseUrl,
+                                secret: secret,
+                                token: token,
+                                updatePhotosState: updatePhotosState);
+                          }));
+                        }
+                      },
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width:
+                                            selected.contains(index) ? 10 : 0,
+                                        color: CupertinoColors.white),
+                                  ),
+                                  child: thumbnailBuilder(index))),
+                          isVideo(index),
+                          uploadStatus(index),
+                          isSelected(index)
+                        ],
+                      ));
+                }),
+          ),
+        ),
+        Visibility(
+          visible: showScrollToTop,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 15),
+              child: GestureDetector(
+                onTap: () {
+                  scrollController.animateTo(0,
+                      duration: Duration(seconds: 2),
+                      curve: Curves.fastLinearToSlowEaseIn);
+                },
+                child: Container(
+                  width: 150,
+                  height: 40,
+                  decoration: BoxDecoration(
+                      color: Constant.CloudPhotosYellow,
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  child: Center(child: Text("Scroll Back to Top")),
+                ),
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 
