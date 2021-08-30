@@ -51,11 +51,15 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
     _transformationController.addListener(() {
       if (_transformationController.value[0] != 1.0 &&
           _transformationController.value[5] != 1.0 &&
-          _transformationController.value[10] != 1.0) {
+          _transformationController.value[10] != 1.0 &&
+          _pageViewPsysics is PageScrollPhysics) {
         setState(() {
           _pageViewPsysics = NeverScrollableScrollPhysics();
         });
-      } else {
+      } else if (_transformationController.value[0] == 1.0 &&
+          _transformationController.value[5] == 1.0 &&
+          _transformationController.value[10] == 1.0 &&
+          _pageViewPsysics is NeverScrollableScrollPhysics) {
         setState(() {
           _pageViewPsysics = PageScrollPhysics();
         });
