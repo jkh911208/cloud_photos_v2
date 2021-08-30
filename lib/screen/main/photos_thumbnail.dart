@@ -20,6 +20,7 @@ import 'package:jaguar_jwt/jaguar_jwt.dart';
 import 'package:package_info/package_info.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ThumbnailScreen extends StatefulWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -41,7 +42,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   String token = "";
   late StreamSubscription<FGBGType> subscription;
   Set<int> selected = Set();
-  bool showScrollToTop = false;
+  bool showScrollToTop = true;
 
   @override
   void initState() {
@@ -63,7 +64,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
           });
         } else if (scrollController.offset < 200 && showScrollToTop == true) {
           setState(() {
-            showScrollToTop = false;
+            showScrollToTop = true;
           });
         }
       });
@@ -106,9 +107,12 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Icon(CupertinoIcons.share,
-                  color: CupertinoColors.white, size: 25),
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () {},
+                child: Icon(CupertinoIcons.share,
+                    color: CupertinoColors.white, size: 25),
+              ),
             ),
             GestureDetector(
                 onTap: () async {
@@ -127,7 +131,6 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                       int index = selected.elementAt(i);
                       data.add(photos[index]);
                     }
-                    print(data);
                     //delete from device
                     int locallyDeleted = await deleteMultipleAssets(data);
 
@@ -142,13 +145,18 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                         }
                       }
                     }
-
-                    print(locallyDeleted);
-                    print(cloudDeleted);
                     setState(() {
                       selected = Set();
                     });
                     await updatePhotosState();
+                    Fluttertoast.showToast(
+                        msg:
+                            "Deleted $locallyDeleted photos locally and $cloudDeleted on Cloud",
+                        toastLength: Toast.LENGTH_LONG,
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 2,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
                   }
                 },
                 child: Icon(CupertinoIcons.delete,
