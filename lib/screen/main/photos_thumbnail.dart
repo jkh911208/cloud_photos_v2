@@ -57,13 +57,15 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     });
     scrollController
       ..addListener(() {
-        setState(() {
-          if (scrollController.offset >= 200) {
+        if (scrollController.offset >= 200 && showScrollToTop == false) {
+          setState(() {
             showScrollToTop = true;
-          } else {
+          });
+        } else if (scrollController.offset < 200 && showScrollToTop == true) {
+          setState(() {
             showScrollToTop = false;
-          }
-        });
+              });
+            }
       });
   }
 
