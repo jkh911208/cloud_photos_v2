@@ -64,6 +64,12 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
   }
 
   @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: CupertinoColors.black,
