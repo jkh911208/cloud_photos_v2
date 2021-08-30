@@ -44,6 +44,15 @@ class MediaTable {
     await db.rawQuery("delete from media");
   }
 
+  Future<void> removeLocalIdByMD5(String md5) async {
+    if (db == null) {
+      db = await getDatabaseObject();
+    }
+
+    return await db
+        .rawUpdate('UPDATE media SET localId = ? WHERE md5 = ?', [null, md5]);
+  }
+
   Future<void> insert(Map<String, dynamic> data) async {
     if (db == null) {
       db = await getDatabaseObject();

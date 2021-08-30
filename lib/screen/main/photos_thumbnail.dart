@@ -565,6 +565,17 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
         );
       }
     }
+    // if photo is deleted from different app try load from cloud
+    else if (photos[index]["cloudId"] != null) {
+      // remove local id
+      print("local file is null, load cloud thumbnail");
+      await mediaTable.removeLocalIdByMD5(photos[index]["md5"]);
+      await updatePhotosState();
+      return await cloudThumbnailBuilder(index);
+    }
+    // if not backed up to cloud remove from db
+    mediaTable.deleteByMD5(photos[index]["md5"]);
+    await updatePhotosState();
     return Container();
   }
 
