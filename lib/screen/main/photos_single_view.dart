@@ -42,8 +42,26 @@ class SingleViewScreen extends StatefulWidget {
 class _SingleViewScreenState extends State<SingleViewScreen> {
   int currentPosition;
   List<Map<String, dynamic>> photos;
+  TransformationController _transformationController =
+      TransformationController();
+  ScrollPhysics _pageViewPsysics = PageScrollPhysics();
 
-  _SingleViewScreenState({required this.photos, required this.currentPosition});
+  _SingleViewScreenState(
+      {required this.photos, required this.currentPosition}) {
+    _transformationController.addListener(() {
+      if (_transformationController.value[0] != 1.0 &&
+          _transformationController.value[5] != 1.0 &&
+          _transformationController.value[10] != 1.0) {
+        setState(() {
+          _pageViewPsysics = NeverScrollableScrollPhysics();
+        });
+      } else {
+        setState(() {
+          _pageViewPsysics = PageScrollPhysics();
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,13 +81,12 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
   }
 
   Future<Widget> buildPageView(BuildContext context) async {
-    TransformationController _transformationController =
-        TransformationController();
     return SafeArea(
       bottom: false,
       child: Stack(
         children: [
           PageView.builder(
+              physics: _pageViewPsysics,
               onPageChanged: (int newPosition) {
                 setState(() {
                   currentPosition = newPosition;
