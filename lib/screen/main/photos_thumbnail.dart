@@ -64,14 +64,15 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
         } else if (scrollController.offset < 200 && showScrollToTop == true) {
           setState(() {
             showScrollToTop = false;
-              });
-            }
+          });
+        }
       });
   }
 
   @override
   void dispose() {
     subscription.cancel();
+    scrollController.dispose();
     super.dispose();
   }
 
