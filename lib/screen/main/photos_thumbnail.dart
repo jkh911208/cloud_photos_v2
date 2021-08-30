@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:cloud_photos_v2/api.dart';
 import 'package:cloud_photos_v2/constant.dart';
@@ -21,6 +22,7 @@ import 'package:package_info/package_info.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ThumbnailScreen extends StatefulWidget {
   const ThumbnailScreen({Key? key}) : super(key: key);
@@ -42,7 +44,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
   String token = "";
   late StreamSubscription<FGBGType> subscription;
   Set<int> selected = Set();
-  bool showScrollToTop = true;
+  bool showScrollToTop = false;
 
   @override
   void initState() {
@@ -64,7 +66,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
           });
         } else if (scrollController.offset < 200 && showScrollToTop == true) {
           setState(() {
-            showScrollToTop = true;
+            showScrollToTop = false;
           });
         }
       });
@@ -109,7 +111,31 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  List<Map<String, dynamic>> data = [];
+                  for (var i = 0; i < selected.length; i++) {
+                    int index = selected.elementAt(i);
+                    data.add(photos[index]);
+                  }
+                  List<String> paths = [];
+                  for (var i = 0; i < data.length; i++) {
+                    if (data[i]["localId"] != null) {
+                      // if local file get path from asset file
+                      AssetEntity? asset =
+                          await AssetEntity.fromId(data[i]["localId"]);
+                      if (asset != null) {
+                        File? file = await asset.file;
+                        if (file != null) {
+                          paths.add(file.path);
+                        }
+                      }
+                    } else {
+                      // if cloud get cache
+                    }
+                  }
+                  print(paths);
+                  Share.shareFiles(paths);
+                },
                 child: Icon(CupertinoIcons.share,
                     color: CupertinoColors.white, size: 25),
               ),
