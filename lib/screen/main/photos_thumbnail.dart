@@ -635,6 +635,13 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     int numUpload = await uploadPendingAssets();
     if (numUpload > 0) {
       await updatePhotosState();
+      Fluttertoast.showToast(
+          msg: "Uploaded $numUpload new photos to Cloud",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 2,
+          textColor: Colors.white,
+          fontSize: 16.0);
     }
   }
 }
