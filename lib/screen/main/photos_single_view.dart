@@ -228,8 +228,11 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
       imageUrl: "${widget.baseUrl}/api/v1/photo/$cloudId-resize.jpeg",
       fit: BoxFit.contain,
       cacheKey: "$cloudId-resize",
-      placeholder: (context, url) =>
-          Center(child: CupertinoActivityIndicator()),
+      errorWidget: (context, url, error) => Center(child: Icon(Icons.error)),
+      progressIndicatorBuilder: (context, url, downloadProgress) {
+        return Center(
+            child: CircularProgressIndicator(value: downloadProgress.progress));
+      },
       httpHeaders: {
         "Authorization": "Bearer ${widget.token}",
         "X-Custom-Auth": issueJwtHS256(

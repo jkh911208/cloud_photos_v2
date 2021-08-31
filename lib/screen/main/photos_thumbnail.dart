@@ -180,13 +180,18 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                     //delete from device
                     int locallyDeleted = await deleteMultipleAssets(data);
 
+                    for (var i = 0; i < data.length; i++) {
+                      if (data[i]["localId"] == null) {}
+                    }
+
                     // delete from cloud
                     int cloudDeleted = 0;
                     for (var i = 0; i < data.length; i++) {
                       if (data[i]["cloudId"] != null) {
                         Map<String, dynamic> result = await Api()
                             .delete("/api/v1/photo/${data[i]["cloudId"]}");
-                        if (result["statudCode"] == 200) {
+                        if (result["statusCode"] == 200) {
+                          await mediaTable.deleteByMD5(data[i]["md5"]);
                           cloudDeleted++;
                         }
                       }
@@ -301,7 +306,49 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                         wifiOnly = value;
                       });
                     }),
-                title: Text('Upload on Wifi Only ')),
+                title: Text('Upload on Wifi Only')),
+            ListTile(
+                onTap: () async {
+                  // check if user want to delete #n of photos from device
+                  List<Map<String, dynamic>> deleting = [];
+                  for (var i = 0; i < photos.length; i++) {
+                    if (photos[i]["localId"] != null &&
+                        photos[i]["cloudId"] != null) {
+                      deleting.add(photos[i]);
+                    }
+                  }
+                  print(deleting);
+
+                  // if confirmed
+                  // use photo manager to remove all photos
+                  int deleted =
+                      await deleteMultipleAssets(deleting, deleteRow: false);
+                  print(deleted);
+
+                  // update state
+                  await updatePhotosState();
+
+                  Fluttertoast.showToast(
+                      msg: "Removed $deleted photos from device",
+                      toastLength: Toast.LENGTH_LONG,
+                      gravity: ToastGravity.BOTTOM,
+                      timeInSecForIosWeb: 2,
+                      textColor: Colors.white,
+                      fontSize: 16.0);
+                },
+                title: Text('Free up phone storage')),
+            ListTile(
+                onTap: () async {
+                  await DefaultCacheManager().emptyCache();
+                  Fluttertoast.showToast(
+                      msg: "Cleared all local cache",
+                      toastLength: Toast.LENGTH_LONG,
+                      gravity: ToastGravity.BOTTOM,
+                      timeInSecForIosWeb: 2,
+                      textColor: Colors.white,
+                      fontSize: 16.0);
+                },
+                title: Text('Clear all cache')),
             Divider(),
             ListTile(
               title: Text("Sign Out"),

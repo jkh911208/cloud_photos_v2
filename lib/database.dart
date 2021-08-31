@@ -53,6 +53,15 @@ class MediaTable {
         .rawUpdate('UPDATE media SET localId = ? WHERE md5 = ?', [null, md5]);
   }
 
+  Future<void> removeLocalIdByLocalId(String localId) async {
+    if (db == null) {
+      db = await getDatabaseObject();
+    }
+
+    return await db.rawUpdate(
+        'UPDATE media SET localId = ? WHERE localId = ?', [null, localId]);
+  }
+
   Future<void> insert(Map<String, dynamic> data) async {
     if (db == null) {
       db = await getDatabaseObject();
@@ -95,6 +104,13 @@ class MediaTable {
       db = await getDatabaseObject();
     }
     await db.delete(table, where: 'md5 = ?', whereArgs: [md5]);
+  }
+
+  Future<void> deleteByLocalId(String localId) async {
+    if (db == null) {
+      db = await getDatabaseObject();
+    }
+    await db.delete(table, where: 'localId = ?', whereArgs: [localId]);
   }
 
   Future updateCloudId(String md5, String cloudId) async {
