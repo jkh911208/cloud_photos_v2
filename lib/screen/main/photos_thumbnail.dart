@@ -648,15 +648,20 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
       }
       return Align(
           alignment: Alignment.bottomLeft,
-          child: Container(
-            width: MediaQuery.of(context).size.width / 4 * 0.55,
-            decoration: BoxDecoration(
-                color: CupertinoColors.white,
-                borderRadius: BorderRadius.all(Radius.circular(20))),
-            child: Row(children: [
-              Icon(CupertinoIcons.play, color: CupertinoColors.black, size: 15),
-              Text("$min:$seconds")
-            ]),
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 4 * 0.5,
+              decoration: BoxDecoration(
+                  color: CupertinoColors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(20))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("$min:$seconds"),
+                ],
+              ),
+            ),
           ));
     }
     return Container();

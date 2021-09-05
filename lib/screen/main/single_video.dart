@@ -2,24 +2,23 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 
 class SingleVideo extends StatefulWidget {
   final File file;
   final PageController pageController;
   late final VideoPlayerController videoController;
-  late final double? currentPage;
+  final int currentPage;
 
-  SingleVideo({Key? key, required this.file, required this.pageController})
+  SingleVideo(
+      {Key? key,
+      required this.file,
+      required this.pageController,
+      required this.currentPage})
       : super(key: key) {
     videoController = VideoPlayerController.file(file);
-    currentPage = pageController.page;
-    pageController.addListener(() {
-      double? newPage = pageController.page;
-      if (currentPage != newPage) {
-        videoController.pause();
-      }
-    });
   }
 
   @override
@@ -29,68 +28,46 @@ class SingleVideo extends StatefulWidget {
 
 class _VideoPlayerState extends State<SingleVideo> {
   bool initialized = false;
-  bool floatingButtonVisible = true;
   VideoPlayerController videoController;
+  late ChewieController chewieController;
 
   _VideoPlayerState({required this.videoController}) {
-    videoController
-      ..initialize().then((_) {
-        setState(() {
-          initialized = true;
-        });
-      });
+    pageInit();
   }
 
   @override
   void dispose() {
-    super.dispose();
     videoController.pause();
     videoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> pageInit() async {
+    await videoController.initialize();
+    chewieController = ChewieController(
+        videoPlayerController: videoController,
+        autoPlay: false,
+        looping: false,
+        deviceOrientationsOnEnterFullScreen: [
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ],
+        deviceOrientationsAfterFullScreen: [
+          DeviceOrientation.portraitUp
+        ]);
+    setState(() {
+      initialized = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return initialized
-        ? Stack(children: [
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (floatingButtonVisible == false) {
-                    videoController.pause();
-                  }
-                  floatingButtonVisible = !floatingButtonVisible;
-                });
-              },
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: videoController.value.aspectRatio,
-                  child: VideoPlayer(videoController),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: floatingButtonVisible,
-              child: Align(
-                alignment: Alignment(0, 0),
-                child: FloatingActionButton(
-                  child: Icon(videoController.value.isPlaying
-                      ? CupertinoIcons.pause
-                      : CupertinoIcons.play),
-                  backgroundColor: CupertinoColors.systemRed,
-                  onPressed: () {
-                    setState(() {
-                      if (videoController.value.isPlaying) {
-                        videoController.pause();
-                      } else {
-                        floatingButtonVisible = false;
-                        videoController.play();
-                      }
-                    });
-                  },
-                ),
-              ),
-            ),
-          ])
+        ? SafeArea(
+            child: Padding(
+            padding: const EdgeInsets.only(bottom: 30),
+            child: Chewie(controller: chewieController),
+          ))
         : Center(
             child: CupertinoActivityIndicator(),
           );

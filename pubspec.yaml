@@ -47,6 +47,7 @@ dependencies:
   share_plus: ^2.1.4
   exif: ^3.0.0
   fluttertoast: ^8.0.8
+  chewie: ^1.2.2
 
 dev_dependencies:
   flutter_test:

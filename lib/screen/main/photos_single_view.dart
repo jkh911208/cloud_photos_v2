@@ -215,7 +215,9 @@ class _SingleViewScreenState extends State<SingleViewScreen> {
             return Image.file(file);
           } else {
             return SingleVideo(
-                file: file, pageController: widget.pageController);
+                currentPage: position,
+                file: file,
+                pageController: widget.pageController);
           }
         }
       }
