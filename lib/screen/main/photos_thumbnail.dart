@@ -7,6 +7,7 @@ import 'package:cloud_photos_v2/constant.dart';
 import 'package:cloud_photos_v2/database.dart';
 import 'package:cloud_photos_v2/library_management.dart';
 import 'package:cloud_photos_v2/screen/loading.dart';
+import 'package:cloud_photos_v2/screen/main/feedback.dart';
 import 'package:cloud_photos_v2/screen/main/photos_single_view.dart';
 import 'package:cloud_photos_v2/storage.dart';
 import 'package:cloud_photos_v2/util.dart';
@@ -350,6 +351,15 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
                 },
                 title: Text('Clear all cache')),
             Divider(),
+            ListTile(
+              title: Text("Give Feedback"),
+              onTap: () async {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
+                  return FeedBackScreen();
+                }));
+              },
+            ),
             ListTile(
               title: Text("Sign Out"),
               onTap: () async {
