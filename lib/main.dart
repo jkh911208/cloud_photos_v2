@@ -11,6 +11,9 @@ void main() async {
   } else if (kReleaseMode) {
     print("loading production.env");
     await dotenv.load(fileName: "production.env");
+  } else {
+    print("not release, not debug, maybe profile");
+    await dotenv.load(fileName: "debug.env");
   }
 
   runApp(

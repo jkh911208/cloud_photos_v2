@@ -63,11 +63,11 @@ class _VideoPlayerState extends State<SingleVideo> {
   @override
   Widget build(BuildContext context) {
     return initialized
-        ? SafeArea(
-            child: Padding(
+        ? Padding(
             padding: const EdgeInsets.only(bottom: 30),
-            child: Chewie(controller: chewieController),
-          ))
+          child: SafeArea(
+                child: Center(child: Chewie(controller: chewieController))),
+          )
         : Center(
             child: CupertinoActivityIndicator(),
           );

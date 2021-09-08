@@ -71,7 +71,7 @@ jobs:
           channel: "stable"
       - run: flutter pub get
       - run: flutter clean
-      - run: flutter build appbundle
+      - run: flutter build appbundle --bundle-sksl-path flutter_01.sksl.json
       - name: Release app to internal track
         uses: r0adkll/upload-google-play@v1
         with:
@@ -137,7 +137,7 @@ jobs:
       - run: flutter pub get
       - run: |
          xcode-project use-profiles
-         flutter build ios --release --no-codesign
+         flutter build ios  --bundle-sksl-path flutter_01.sksl.json --release --no-codesign
          xcode-project build-ipa --workspace ios/Runner.xcworkspace --scheme Runner --config Release
 
       - name: Upload app to App Store Connect
