@@ -613,7 +613,7 @@ class _ThumbnailScreenState extends State<ThumbnailScreen> {
     String id = photos[index]["localId"];
     AssetEntity? asset = await AssetEntity.fromId(id);
     if (asset != null) {
-      Uint8List? thumbnail = await asset.thumbData;
+      Uint8List? thumbnail = await asset.thumbDataWithSize(75, 75);
       if (thumbnail != null) {
         return Image.memory(
           thumbnail,
